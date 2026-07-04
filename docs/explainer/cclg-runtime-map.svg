@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">CCLG Runtime: Source-Grounded Agent Memory</title>
+  <desc id="desc">A CCLG-only runtime map showing agent host hooks and MCP tools, context packs, the local CCLG store, mutation rules, and invariants.</desc>
+  <defs>
+    <marker id="arrow-black" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#1f2937" />
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb" />
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#15803d" />
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#c2410c" />
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 700 42px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .subtitle { font: 500 19px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4b5563; }
+      .lane-label { font: 700 20px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .box-title { font: 700 22px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .box-text { font: 500 17px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .small { font: 600 15px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .mono { font: 600 17px ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; fill: #111827; }
+      .stroke { stroke: #1f2937; stroke-width: 2.6; }
+      .soft-stroke { stroke: #94a3b8; stroke-width: 1.6; }
+      .dash { stroke-dasharray: 8 8; }
+      .blue { fill: #eff6ff; stroke: #2563eb; }
+      .green { fill: #ecfdf5; stroke: #15803d; }
+      .orange { fill: #fff7ed; stroke: #c2410c; }
+      .purple { fill: #f5f3ff; stroke: #7c3aed; }
+      .gray { fill: #f8fafc; stroke: #64748b; }
+      .chip { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.8; }
+      .arrow-black { stroke: #1f2937; stroke-width: 2.8; fill: none; marker-end: url(#arrow-black); }
+      .arrow-blue { stroke: #2563eb; stroke-width: 2.8; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #15803d; stroke-width: 2.8; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #c2410c; stroke-width: 2.8; fill: none; marker-end: url(#arrow-orange); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900" />
+  <text class="title" x="72" y="70">CCLG Runtime: Source-Grounded Agent Memory</text>
+  <text class="subtitle" x="74" y="104">Local-first store, lifecycle hooks, MCP tools, active packs, code graph context, and append-only memory mutation.</text>
+
+  <line class="soft-stroke dash" x1="62" y1="178" x2="1538" y2="178" />
+  <line class="soft-stroke dash" x1="62" y1="332" x2="1538" y2="332" />
+  <line class="soft-stroke dash" x1="62" y1="630" x2="1538" y2="630" />
+  <line class="soft-stroke dash" x1="62" y1="762" x2="1538" y2="762" />
+
+  <text class="lane-label" x="74" y="154">1. Agent Host</text>
+  <text class="lane-label" x="74" y="308">2. Context Surfaces</text>
+  <text class="lane-label" x="74" y="458">3. CCLG Store</text>
+  <text class="lane-label" x="74" y="708">4. Mutation Rules</text>
+  <text class="lane-label" x="74" y="837">5. Invariants</text>
+
+  <rect class="blue stroke" x="246" y="136" width="258" height="82" rx="14" />
+  <text class="box-title" x="290" y="170">Lifecycle Hooks</text>
+  <text class="box-text" x="282" y="198">prompt, tool, compact</text>
+
+  <rect class="blue stroke" x="552" y="136" width="258" height="82" rx="14" />
+  <text class="box-title" x="613" y="170">MCP Tools</text>
+  <text class="box-text" x="594" y="198">search, pack, patch</text>
+
+  <rect class="gray stroke" x="950" y="128" width="388" height="100" rx="18" />
+  <text class="box-title" x="986" y="164">Agent receives only</text>
+  <text class="box-text" x="986" y="194">active scoped context, not raw graph state</text>
+
+  <rect class="green stroke" x="288" y="286" width="330" height="92" rx="16" />
+  <text class="box-title" x="348" y="322">ActiveMemoryPack</text>
+  <text class="box-text" x="340" y="352">effective memory view for a task</text>
+
+  <rect class="green stroke" x="678" y="286" width="330" height="92" rx="16" />
+  <text class="box-title" x="756" y="322">CodeGraphPack</text>
+  <text class="box-text" x="724" y="352">files, symbols, imports, churn</text>
+
+  <rect class="orange stroke" x="246" y="414" width="1092" height="188" rx="22" />
+  <text class="box-title" x="286" y="454">CCLG Store</text>
+  <text class="mono" x="430" y="454">CCLG_HOME or ~/.cclg</text>
+
+  <rect class="chip" x="286" y="486" width="182" height="78" rx="12" />
+  <text class="mono" x="314" y="518">raw/</text>
+  <text class="small" x="314" y="546">Raw Evidence</text>
+
+  <rect class="chip" x="492" y="486" width="182" height="78" rx="12" />
+  <text class="mono" x="520" y="518">sessions/</text>
+  <text class="small" x="520" y="546">SessionState</text>
+
+  <rect class="chip" x="698" y="486" width="182" height="78" rx="12" />
+  <text class="mono" x="726" y="518">nodes/</text>
+  <text class="small" x="726" y="546">MemoryNode</text>
+
+  <rect class="chip" x="904" y="486" width="182" height="78" rx="12" />
+  <text class="mono" x="932" y="518">patches/</text>
+  <text class="small" x="932" y="546">MemoryPatch</text>
+
+  <rect class="chip" x="1110" y="486" width="182" height="78" rx="12" />
+  <text class="mono" x="1138" y="518">edges/</text>
+  <text class="small" x="1138" y="546">MemoryEdge</text>
+
+  <rect class="chip" x="286" y="582" width="280" height="0" rx="0" opacity="0" />
+  <text class="mono" x="306" y="588">active/codegraphs/</text>
+  <text class="small" x="512" y="588">CodeGraph</text>
+  <text class="mono" x="714" y="588">audit/</text>
+  <text class="small" x="792" y="588">Audit</text>
+  <text class="mono" x="940" y="588">indexes/</text>
+  <text class="small" x="1048" y="588">RetrievalIndex</text>
+
+  <rect class="purple stroke" x="312" y="676" width="932" height="66" rx="16" />
+  <text class="box-title" x="356" y="716">MemoryPatch</text>
+  <text class="box-text" x="520" y="716">changes node status</text>
+  <text class="box-title" x="756" y="716">MemoryNode</text>
+  <text class="box-text" x="906" y="716">creates</text>
+  <text class="box-title" x="1004" y="716">MemoryEdge</text>
+
+  <rect class="chip" x="246" y="808" width="184" height="50" rx="25" />
+  <text class="small" x="280" y="838">source required</text>
+
+  <rect class="chip" x="454" y="808" width="210" height="50" rx="25" />
+  <text class="small" x="486" y="838">append-only patches</text>
+
+  <rect class="chip" x="688" y="808" width="174" height="50" rx="25" />
+  <text class="small" x="726" y="838">active view only</text>
+
+  <rect class="chip" x="886" y="808" width="224" height="50" rx="25" />
+  <text class="small" x="924" y="838">suppressed not injected</text>
+
+  <rect class="chip" x="1134" y="808" width="146" height="50" rx="25" />
+  <text class="small" x="1176" y="838">local-first</text>
+
+  <path class="arrow-orange" d="M374 222 C244 278, 216 360, 310 414" />
+  <path class="arrow-orange" d="M680 222 C692 290, 664 360, 616 414" />
+  <path class="arrow-green" d="M454 414 C454 400, 454 392, 454 382" />
+  <path class="arrow-green" d="M842 414 C842 400, 842 392, 842 382" />
+  <path class="arrow-blue" d="M454 284 C520 238, 760 226, 950 176" />
+  <path class="arrow-blue" d="M842 284 C902 234, 1018 216, 1042 228" />
+  <path class="arrow-black" d="M996 564 C990 608, 948 648, 910 674" />
+  <path class="arrow-black" d="M492 742 C492 770, 522 790, 558 804" />
+  <path class="arrow-black" d="M810 742 C808 770, 780 790, 774 804" />
+
+  <text class="small" x="246" y="264">write raw/session/audit evidence</text>
+  <text class="small" x="1018" y="258">inject active context</text>
+  <text class="small" x="1054" y="646">patches preserve provenance</text>
+</svg>

@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{CCLG_BIN_DIR}}/cclg-hook user-prompt --include-codegraph --code-root \"$PWD\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{CCLG_BIN_DIR}}/cclg-hook post-tool"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{CCLG_BIN_DIR}}/cclg-hook pre-compact"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "cclg": {
+      "command": "{{CCLG_BIN_DIR}}/cclg-mcp",
+      "args": []
+    }
+  }
+}

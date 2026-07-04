@@ -1,0 +1,6 @@
+{"event": "raw_written", "path": "docs/explainer/demo-store/raw/demo-source.md", "created_at": "2026-06-30T09:58:47+00:00"}
+{"event": "patch_written", "patch_id": "patch_ad5c337890c3", "operation": "refine", "target_ids": ["mem_0524abcafba4"], "created_at": "2026-06-30T09:58:47+00:00"}
+{"event": "session_started", "session_id": "demo-session", "created_at": "2026-06-30T09:58:47+00:00"}
+{"event": "session_overlay_written", "session_id": "demo-session", "node_id": "mem_abedb4edaeb1", "created_at": "2026-06-30T09:58:47+00:00"}
+{"event": "raw_written", "path": "docs/explainer/demo-store/raw/demo-session-user_prompt-2026-06-30T095847-0000.json", "created_at": "2026-06-30T09:58:47+00:00"}
+{"event": "session_event", "session_id": "demo-session", "session_event": "user_prompt", "created_at": "2026-06-30T09:58:47+00:00"}

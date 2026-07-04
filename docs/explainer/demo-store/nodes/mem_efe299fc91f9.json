@@ -1,0 +1,67 @@
+{
+  "schema_version": "cclg.memory_node.v0.1",
+  "id": "mem_efe299fc91f9",
+  "type": "benchmark_requirement",
+  "scope": {
+    "user": "user_local",
+    "org": null,
+    "workspace": null,
+    "project": null,
+    "agent": "global",
+    "session": null
+  },
+  "key": "demo.benchmark.gates",
+  "content": "CCLG 검증은 mutation, retrieval, pack, hook, MCP, codegraph local gates와 외부 memory/tool/code benchmark track으로 나눈다.",
+  "status": "active",
+  "confidence": 1.0,
+  "priority": "high",
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "updated_at": "2026-06-30T09:58:47+00:00",
+  "effective_from": "2026-06-30T09:58:47+00:00",
+  "effective_until": null,
+  "source": {
+    "label": "demo:benchmark",
+    "session_ids": [],
+    "turn_ids": [],
+    "raw_spans": [],
+    "tool_result_ids": [],
+    "artifact_ids": []
+  },
+  "relations": {
+    "supersedes": [],
+    "superseded_by": [],
+    "refines": [],
+    "expands": [],
+    "narrows": [],
+    "contradicts": [],
+    "depends_on": [],
+    "derived_from": []
+  },
+  "retrieval": {
+    "sparse_keys": [
+      "benchmark",
+      "cclg",
+      "codegraph",
+      "gates와",
+      "hook",
+      "local",
+      "mcp",
+      "memory/tool/code",
+      "mutation",
+      "pack",
+      "retrieval",
+      "track으로",
+      "검증은",
+      "나눈다"
+    ],
+    "dense_text": "CCLG 검증은 mutation, retrieval, pack, hook, MCP, codegraph local gates와 외부 memory/tool/code benchmark track으로 나눈다.",
+    "entity_keys": [],
+    "temporal_keys": []
+  },
+  "metadata": {
+    "created_by": "manual",
+    "review_status": "auto_applied",
+    "privacy": "local_default"
+  },
+  "tags": []
+}

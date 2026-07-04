@@ -1,0 +1,3247 @@
+{
+  "schema_version": "cclg.code_graph.v0.1",
+  "root": "/home/user/CCLG",
+  "generated_at": "2026-06-30T10:21:22+00:00",
+  "git": {
+    "is_repo": true,
+    "head": "b01b2f4",
+    "branch": "master"
+  },
+  "files": [
+    {
+      "path": "scripts/apply-local.sh",
+      "language": "shell",
+      "lines": 6,
+      "bytes": 164,
+      "git_churn": 3,
+      "imports": []
+    },
+    {
+      "path": "scripts/install.sh",
+      "language": "shell",
+      "lines": 135,
+      "bytes": 3342,
+      "git_churn": 2,
+      "imports": []
+    },
+    {
+      "path": "scripts/publish-github.sh",
+      "language": "shell",
+      "lines": 93,
+      "bytes": 1622,
+      "git_churn": 2,
+      "imports": []
+    },
+    {
+      "path": "scripts/uninstall.sh",
+      "language": "shell",
+      "lines": 41,
+      "bytes": 807,
+      "git_churn": 1,
+      "imports": []
+    },
+    {
+      "path": "src/cclg/__init__.py",
+      "language": "python",
+      "lines": 6,
+      "bytes": 89,
+      "git_churn": 1,
+      "imports": []
+    },
+    {
+      "path": "src/cclg/bench.py",
+      "language": "python",
+      "lines": 136,
+      "bytes": 6447,
+      "git_churn": 2,
+      "imports": [
+        ".codegraph",
+        ".hooks",
+        ".mcp_server",
+        ".models",
+        ".pack",
+        ".patches",
+        ".retrieval",
+        ".store",
+        "__future__",
+        "json",
+        "pathlib",
+        "tempfile",
+        "typing"
+      ]
+    },
+    {
+      "path": "src/cclg/cli.py",
+      "language": "python",
+      "lines": 750,
+      "bytes": 31144,
+      "git_churn": 7,
+      "imports": [
+        ".bench",
+        ".codegraph",
+        ".format",
+        ".models",
+        ".pack",
+        ".patches",
+        ".retrieval",
+        ".schema",
+        ".session",
+        ".store",
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "sys"
+      ]
+    },
+    {
+      "path": "src/cclg/codegraph.py",
+      "language": "python",
+      "lines": 384,
+      "bytes": 12546,
+      "git_churn": 2,
+      "imports": [
+        ".format",
+        ".models",
+        ".retrieval",
+        "__future__",
+        "ast",
+        "dataclasses",
+        "json",
+        "pathlib",
+        "re",
+        "subprocess",
+        "typing"
+      ]
+    },
+    {
+      "path": "src/cclg/format.py",
+      "language": "python",
+      "lines": 79,
+      "bytes": 2512,
+      "git_churn": 2,
+      "imports": [
+        "__future__",
+        "json"
+      ]
+    },
+    {
+      "path": "src/cclg/hooks.py",
+      "language": "python",
+      "lines": 140,
+      "bytes": 5094,
+      "git_churn": 3,
+      "imports": [
+        ".codegraph",
+        ".format",
+        ".pack",
+        ".session",
+        ".store",
+        "__future__",
+        "argparse",
+        "json",
+        "os",
+        "pathlib",
+        "sys",
+        "typing"
+      ]
+    },
+    {
+      "path": "src/cclg/mcp_server.py",
+      "language": "python",
+      "lines": 286,
+      "bytes": 14284,
+      "git_churn": 3,
+      "imports": [
+        ".bench",
+        ".codegraph",
+        ".models",
+        ".pack",
+        ".patches",
+        ".retrieval",
+        ".schema",
+        ".session",
+        ".store",
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "sys",
+        "typing"
+      ]
+    },
+    {
+      "path": "src/cclg/models.py",
+      "language": "python",
+      "lines": 357,
+      "bytes": 12998,
+      "git_churn": 3,
+      "imports": [
+        ".format",
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing",
+        "uuid"
+      ]
+    },
+    {
+      "path": "src/cclg/pack.py",
+      "language": "python",
+      "lines": 43,
+      "bytes": 1418,
+      "git_churn": 3,
+      "imports": [
+        ".format",
+        ".models",
+        ".patches",
+        ".retrieval",
+        ".store",
+        "__future__"
+      ]
+    },
+    {
+      "path": "src/cclg/patches.py",
+      "language": "python",
+      "lines": 83,
+      "bytes": 3068,
+      "git_churn": 2,
+      "imports": [
+        ".models",
+        ".store",
+        "__future__"
+      ]
+    },
+    {
+      "path": "src/cclg/retrieval.py",
+      "language": "python",
+      "lines": 53,
+      "bytes": 1547,
+      "git_churn": 1,
+      "imports": [
+        ".models",
+        "__future__",
+        "collections",
+        "dataclasses",
+        "math",
+        "re"
+      ]
+    },
+    {
+      "path": "src/cclg/schema.py",
+      "language": "python",
+      "lines": 236,
+      "bytes": 8138,
+      "git_churn": 1,
+      "imports": [
+        ".format",
+        "__future__",
+        "typing"
+      ]
+    },
+    {
+      "path": "src/cclg/session.py",
+      "language": "python",
+      "lines": 140,
+      "bytes": 4538,
+      "git_churn": 3,
+      "imports": [
+        ".format",
+        ".models",
+        ".store",
+        "__future__",
+        "json",
+        "pathlib",
+        "uuid"
+      ]
+    },
+    {
+      "path": "src/cclg/store.py",
+      "language": "python",
+      "lines": 119,
+      "bytes": 4233,
+      "git_churn": 4,
+      "imports": [
+        ".format",
+        ".models",
+        "__future__",
+        "json",
+        "os",
+        "pathlib",
+        "typing"
+      ]
+    },
+    {
+      "path": "tests/test_cclg_core.py",
+      "language": "python",
+      "lines": 119,
+      "bytes": 4951,
+      "git_churn": 4,
+      "imports": [
+        "__future__",
+        "cclg.format",
+        "cclg.models",
+        "cclg.pack",
+        "cclg.patches",
+        "cclg.retrieval",
+        "cclg.session",
+        "cclg.store",
+        "pathlib",
+        "tempfile",
+        "unittest"
+      ]
+    },
+    {
+      "path": "tests/test_surfaces.py",
+      "language": "python",
+      "lines": 162,
+      "bytes": 6883,
+      "git_churn": 6,
+      "imports": [
+        "__future__",
+        "cclg.bench",
+        "cclg.cli",
+        "cclg.codegraph",
+        "cclg.format",
+        "cclg.hooks",
+        "cclg.mcp_server",
+        "cclg.models",
+        "cclg.pack",
+        "cclg.store",
+        "contextlib",
+        "io",
+        "pathlib",
+        "tempfile",
+        "unittest"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "name": "run_benchmarks",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 17,
+      "signature": "def run_benchmarks()"
+    },
+    {
+      "name": "bench_mutation",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 45,
+      "signature": "def bench_mutation()"
+    },
+    {
+      "name": "bench_retrieval",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 65,
+      "signature": "def bench_retrieval()"
+    },
+    {
+      "name": "bench_pack",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 73,
+      "signature": "def bench_pack()"
+    },
+    {
+      "name": "bench_hook",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 93,
+      "signature": "def bench_hook()"
+    },
+    {
+      "name": "bench_mcp",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 104,
+      "signature": "def bench_mcp()"
+    },
+    {
+      "name": "bench_codegraph",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 119,
+      "signature": "def bench_codegraph(repo_root)"
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/cclg/bench.py",
+      "line": 130,
+      "signature": "def main()"
+    },
+    {
+      "name": "build_parser",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 20,
+      "signature": "def build_parser()"
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 158,
+      "signature": "def main(argv)"
+    },
+    {
+      "name": "_main",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 166,
+      "signature": "def _main(argv)"
+    },
+    {
+      "name": "import_jsonl",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 415,
+      "signature": "def import_jsonl(store, path)"
+    },
+    {
+      "name": "parse_scope",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 439,
+      "signature": "def parse_scope(values)"
+    },
+    {
+      "name": "print_search_hits",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 449,
+      "signature": "def print_search_hits(hits)"
+    },
+    {
+      "name": "grep_store",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 457,
+      "signature": "def grep_store(store, query)"
+    },
+    {
+      "name": "validate_paths",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 478,
+      "signature": "def validate_paths(paths)"
+    },
+    {
+      "name": "validate_record",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 509,
+      "signature": "def validate_record(value)"
+    },
+    {
+      "name": "is_evidence_path",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 527,
+      "signature": "def is_evidence_path(path)"
+    },
+    {
+      "name": "parse_json_record",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 531,
+      "signature": "def parse_json_record(text)"
+    },
+    {
+      "name": "run_code_index",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 541,
+      "signature": "def run_code_index(store)"
+    },
+    {
+      "name": "pack_markdown",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 558,
+      "signature": "def pack_markdown(pack)"
+    },
+    {
+      "name": "doctor_report",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 576,
+      "signature": "def doctor_report(store)"
+    },
+    {
+      "name": "audit_report",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 604,
+      "signature": "def audit_report(store)"
+    },
+    {
+      "name": "read_patch",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 624,
+      "signature": "def read_patch(store, patch_id)"
+    },
+    {
+      "name": "patch_diff",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 631,
+      "signature": "def patch_diff(store, patch_id)"
+    },
+    {
+      "name": "rollback_patch",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 638,
+      "signature": "def rollback_patch(store, patch_id)"
+    },
+    {
+      "name": "write_codex_skills",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 664,
+      "signature": "def write_codex_skills()"
+    },
+    {
+      "name": "write_skill",
+      "kind": "function",
+      "path": "src/cclg/cli.py",
+      "line": 740,
+      "signature": "def write_skill(name, body)"
+    },
+    {
+      "name": "CodeSymbol",
+      "kind": "class",
+      "path": "src/cclg/codegraph.py",
+      "line": 68,
+      "signature": "class CodeSymbol()"
+    },
+    {
+      "name": "CodeEdge",
+      "kind": "class",
+      "path": "src/cclg/codegraph.py",
+      "line": 77,
+      "signature": "class CodeEdge()"
+    },
+    {
+      "name": "CodeGraph",
+      "kind": "class",
+      "path": "src/cclg/codegraph.py",
+      "line": 85,
+      "signature": "class CodeGraph()"
+    },
+    {
+      "name": "to_dict",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 94,
+      "signature": "def to_dict(self)"
+    },
+    {
+      "name": "from_dict",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 101,
+      "signature": "def from_dict(cls, value)"
+    },
+    {
+      "name": "build_code_graph",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 113,
+      "signature": "def build_code_graph(root)"
+    },
+    {
+      "name": "list_code_files",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 155,
+      "signature": "def list_code_files(root)"
+    },
+    {
+      "name": "is_code_file",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 169,
+      "signature": "def is_code_file(path)"
+    },
+    {
+      "name": "parse_symbols",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 173,
+      "signature": "def parse_symbols(path, text, rel)"
+    },
+    {
+      "name": "parse_python_symbols",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 179,
+      "signature": "def parse_python_symbols(text, rel)"
+    },
+    {
+      "name": "python_signature",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 202,
+      "signature": "def python_signature(node)"
+    },
+    {
+      "name": "parse_text_symbols",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 213,
+      "signature": "def parse_text_symbols(text, rel)"
+    },
+    {
+      "name": "parse_imports",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 226,
+      "signature": "def parse_imports(path, text)"
+    },
+    {
+      "name": "parse_python_imports",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 237,
+      "signature": "def parse_python_imports(text)"
+    },
+    {
+      "name": "resolve_import",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 252,
+      "signature": "def resolve_import(root, file_path, imported)"
+    },
+    {
+      "name": "search_code_graph",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 277,
+      "signature": "def search_code_graph(graph, query)"
+    },
+    {
+      "name": "render_code_pack",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 296,
+      "signature": "def render_code_pack(graph, query)"
+    },
+    {
+      "name": "save_code_graph",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 319,
+      "signature": "def save_code_graph(graph, path)"
+    },
+    {
+      "name": "load_code_graph",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 324,
+      "signature": "def load_code_graph(path)"
+    },
+    {
+      "name": "language_for",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 328,
+      "signature": "def language_for(path)"
+    },
+    {
+      "name": "read_text_safely",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 344,
+      "signature": "def read_text_safely(path)"
+    },
+    {
+      "name": "git_ls_files",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 351,
+      "signature": "def git_ls_files(root)"
+    },
+    {
+      "name": "git_churn",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 358,
+      "signature": "def git_churn(root)"
+    },
+    {
+      "name": "git_metadata",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 370,
+      "signature": "def git_metadata(root)"
+    },
+    {
+      "name": "run_git",
+      "kind": "function",
+      "path": "src/cclg/codegraph.py",
+      "line": 378,
+      "signature": "def run_git(root, args)"
+    },
+    {
+      "name": "toml_string",
+      "kind": "function",
+      "path": "src/cclg/format.py",
+      "line": 17,
+      "signature": "def toml_string(value)"
+    },
+    {
+      "name": "source_label",
+      "kind": "function",
+      "path": "src/cclg/format.py",
+      "line": 23,
+      "signature": "def source_label(source)"
+    },
+    {
+      "name": "render_active_pack_toml",
+      "kind": "function",
+      "path": "src/cclg/format.py",
+      "line": 36,
+      "signature": "def render_active_pack_toml(pack)"
+    },
+    {
+      "name": "build_parser",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 17,
+      "signature": "def build_parser()"
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 27,
+      "signature": "def main(argv)"
+    },
+    {
+      "name": "read_stdin_json",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 39,
+      "signature": "def read_stdin_json()"
+    },
+    {
+      "name": "user_prompt_context",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 49,
+      "signature": "def user_prompt_context(store, payload)"
+    },
+    {
+      "name": "ingest_event",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 82,
+      "signature": "def ingest_event(store, event, payload)"
+    },
+    {
+      "name": "markdown_pack",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 96,
+      "signature": "def markdown_pack(pack)"
+    },
+    {
+      "name": "extract_prompt",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 115,
+      "signature": "def extract_prompt(payload)"
+    },
+    {
+      "name": "extract_session_id",
+      "kind": "function",
+      "path": "src/cclg/hooks.py",
+      "line": 130,
+      "signature": "def extract_session_id(payload)"
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 22,
+      "signature": "def main(argv)"
+    },
+    {
+      "name": "handle_message",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 36,
+      "signature": "def handle_message(message, store)"
+    },
+    {
+      "name": "call_tool",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 62,
+      "signature": "def call_tool(name, args, store)"
+    },
+    {
+      "name": "tool_search",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 87,
+      "signature": "def tool_search(args, store)"
+    },
+    {
+      "name": "tool_grep",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 93,
+      "signature": "def tool_grep(args, store)"
+    },
+    {
+      "name": "tool_pack",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 118,
+      "signature": "def tool_pack(args, store)"
+    },
+    {
+      "name": "tool_add",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 129,
+      "signature": "def tool_add(args, store)"
+    },
+    {
+      "name": "tool_patch",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 142,
+      "signature": "def tool_patch(args, store)"
+    },
+    {
+      "name": "tool_raw",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 154,
+      "signature": "def tool_raw(args, store)"
+    },
+    {
+      "name": "tool_code_index",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 159,
+      "signature": "def tool_code_index(args, store)"
+    },
+    {
+      "name": "tool_code_search",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 167,
+      "signature": "def tool_code_search(args, store)"
+    },
+    {
+      "name": "tool_bench",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 174,
+      "signature": "def tool_bench(args, store)"
+    },
+    {
+      "name": "tool_audit",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 181,
+      "signature": "def tool_audit(args, store)"
+    },
+    {
+      "name": "tool_result",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 198,
+      "signature": "def tool_result(data)"
+    },
+    {
+      "name": "tool_definitions",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 206,
+      "signature": "def tool_definitions()"
+    },
+    {
+      "name": "object_schema",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 228,
+      "signature": "def object_schema(properties, required)"
+    },
+    {
+      "name": "error_response",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 237,
+      "signature": "def error_response(msg_id, code, message)"
+    },
+    {
+      "name": "iter_messages",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 241,
+      "signature": "def iter_messages(stream)"
+    },
+    {
+      "name": "write_message",
+      "kind": "function",
+      "path": "src/cclg/mcp_server.py",
+      "line": 276,
+      "signature": "def write_message(stream, message)"
+    },
+    {
+      "name": "now_iso",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 41,
+      "signature": "def now_iso()"
+    },
+    {
+      "name": "new_id",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 45,
+      "signature": "def new_id(prefix)"
+    },
+    {
+      "name": "default_scope",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 49,
+      "signature": "def default_scope()"
+    },
+    {
+      "name": "default_source",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 53,
+      "signature": "def default_source(label)"
+    },
+    {
+      "name": "source_from_value",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 70,
+      "signature": "def source_from_value(value)"
+    },
+    {
+      "name": "default_relations",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 82,
+      "signature": "def default_relations()"
+    },
+    {
+      "name": "default_retrieval",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 95,
+      "signature": "def default_retrieval(content, tags)"
+    },
+    {
+      "name": "Provenance",
+      "kind": "class",
+      "path": "src/cclg/models.py",
+      "line": 101,
+      "signature": "class Provenance()"
+    },
+    {
+      "name": "from_value",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 108,
+      "signature": "def from_value(cls, value)"
+    },
+    {
+      "name": "MemoryNode",
+      "kind": "class",
+      "path": "src/cclg/models.py",
+      "line": 120,
+      "signature": "class MemoryNode()"
+    },
+    {
+      "name": "create",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 141,
+      "signature": "def create(cls)"
+    },
+    {
+      "name": "from_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 171,
+      "signature": "def from_dict(cls, value)"
+    },
+    {
+      "name": "provenance",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 203,
+      "signature": "def provenance(self)"
+    },
+    {
+      "name": "supersedes",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 207,
+      "signature": "def supersedes(self)"
+    },
+    {
+      "name": "to_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 210,
+      "signature": "def to_dict(self)"
+    },
+    {
+      "name": "MemoryPatch",
+      "kind": "class",
+      "path": "src/cclg/models.py",
+      "line": 234,
+      "signature": "class MemoryPatch()"
+    },
+    {
+      "name": "create",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 249,
+      "signature": "def create(cls)"
+    },
+    {
+      "name": "from_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 274,
+      "signature": "def from_dict(cls, value)"
+    },
+    {
+      "name": "to_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 291,
+      "signature": "def to_dict(self)"
+    },
+    {
+      "name": "MemoryEdge",
+      "kind": "class",
+      "path": "src/cclg/models.py",
+      "line": 309,
+      "signature": "class MemoryEdge()"
+    },
+    {
+      "name": "create",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 319,
+      "signature": "def create(cls)"
+    },
+    {
+      "name": "from_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 323,
+      "signature": "def from_dict(cls, value)"
+    },
+    {
+      "name": "to_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 334,
+      "signature": "def to_dict(self)"
+    },
+    {
+      "name": "ActiveMemoryPack",
+      "kind": "class",
+      "path": "src/cclg/models.py",
+      "line": 347,
+      "signature": "class ActiveMemoryPack()"
+    },
+    {
+      "name": "to_dict",
+      "kind": "function",
+      "path": "src/cclg/models.py",
+      "line": 355,
+      "signature": "def to_dict(self)"
+    },
+    {
+      "name": "compile_pack",
+      "kind": "function",
+      "path": "src/cclg/pack.py",
+      "line": 10,
+      "signature": "def compile_pack(store, query)"
+    },
+    {
+      "name": "apply_patch",
+      "kind": "function",
+      "path": "src/cclg/patches.py",
+      "line": 18,
+      "signature": "def apply_patch(store, patch)"
+    },
+    {
+      "name": "active_nodes",
+      "kind": "function",
+      "path": "src/cclg/patches.py",
+      "line": 71,
+      "signature": "def active_nodes(store)"
+    },
+    {
+      "name": "suppressed_nodes",
+      "kind": "function",
+      "path": "src/cclg/patches.py",
+      "line": 81,
+      "signature": "def suppressed_nodes(store)"
+    },
+    {
+      "name": "tokenize",
+      "kind": "function",
+      "path": "src/cclg/retrieval.py",
+      "line": 14,
+      "signature": "def tokenize(text)"
+    },
+    {
+      "name": "SearchHit",
+      "kind": "class",
+      "path": "src/cclg/retrieval.py",
+      "line": 19,
+      "signature": "class SearchHit()"
+    },
+    {
+      "name": "search_nodes",
+      "kind": "function",
+      "path": "src/cclg/retrieval.py",
+      "line": 25,
+      "signature": "def search_nodes(query, nodes)"
+    },
+    {
+      "name": "validate_node",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 136,
+      "signature": "def validate_node(value)"
+    },
+    {
+      "name": "validate_patch",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 165,
+      "signature": "def validate_patch(value)"
+    },
+    {
+      "name": "validate_edge",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 188,
+      "signature": "def validate_edge(value)"
+    },
+    {
+      "name": "validate_session",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 206,
+      "signature": "def validate_session(value)"
+    },
+    {
+      "name": "validate_active_pack",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 215,
+      "signature": "def validate_active_pack(value)"
+    },
+    {
+      "name": "missing_fields",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 225,
+      "signature": "def missing_fields(kind, value, required)"
+    },
+    {
+      "name": "is_source_grounded",
+      "kind": "function",
+      "path": "src/cclg/schema.py",
+      "line": 229,
+      "signature": "def is_source_grounded(source)"
+    },
+    {
+      "name": "normalize_session_id",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 12,
+      "signature": "def normalize_session_id(session_id)"
+    },
+    {
+      "name": "session_path",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 16,
+      "signature": "def session_path(store, session_id)"
+    },
+    {
+      "name": "load_session",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 21,
+      "signature": "def load_session(store, session_id)"
+    },
+    {
+      "name": "save_session",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 32,
+      "signature": "def save_session(store, session)"
+    },
+    {
+      "name": "append_session_event",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 38,
+      "signature": "def append_session_event(store)"
+    },
+    {
+      "name": "new_session_state",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 49,
+      "signature": "def new_session_state()"
+    },
+    {
+      "name": "start_session",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 81,
+      "signature": "def start_session(store)"
+    },
+    {
+      "name": "end_session",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 105,
+      "signature": "def end_session(store, session_id)"
+    },
+    {
+      "name": "write_overlay_node",
+      "kind": "function",
+      "path": "src/cclg/session.py",
+      "line": 114,
+      "signature": "def write_overlay_node(store)"
+    },
+    {
+      "name": "CCLGStore",
+      "kind": "class",
+      "path": "src/cclg/store.py",
+      "line": 15,
+      "signature": "class CCLGStore()"
+    },
+    {
+      "name": "__init__",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 16,
+      "signature": "def __init__(self, root)"
+    },
+    {
+      "name": "init",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 26,
+      "signature": "def init(self)"
+    },
+    {
+      "name": "write_node",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 53,
+      "signature": "def write_node(self, node)"
+    },
+    {
+      "name": "read_node",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 57,
+      "signature": "def read_node(self, node_id)"
+    },
+    {
+      "name": "iter_nodes",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 60,
+      "signature": "def iter_nodes(self)"
+    },
+    {
+      "name": "write_patch",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 65,
+      "signature": "def write_patch(self, patch)"
+    },
+    {
+      "name": "iter_patches",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 78,
+      "signature": "def iter_patches(self)"
+    },
+    {
+      "name": "write_edge",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 83,
+      "signature": "def write_edge(self, edge)"
+    },
+    {
+      "name": "iter_edges",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 87,
+      "signature": "def iter_edges(self)"
+    },
+    {
+      "name": "append_raw",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 92,
+      "signature": "def append_raw(self, name, text)"
+    },
+    {
+      "name": "append_audit",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 104,
+      "signature": "def append_audit(self, event)"
+    },
+    {
+      "name": "_read_json",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 112,
+      "signature": "def _read_json(path)"
+    },
+    {
+      "name": "_write_json",
+      "kind": "function",
+      "path": "src/cclg/store.py",
+      "line": 116,
+      "signature": "def _write_json(path, value)"
+    },
+    {
+      "name": "CCLGCoreTests",
+      "kind": "class",
+      "path": "tests/test_cclg_core.py",
+      "line": 16,
+      "signature": "class CCLGCoreTests()"
+    },
+    {
+      "name": "test_patch_refine_suppresses_old_node",
+      "kind": "function",
+      "path": "tests/test_cclg_core.py",
+      "line": 17,
+      "signature": "def test_patch_refine_suppresses_old_node(self)"
+    },
+    {
+      "name": "test_search_prefers_active_sparse_match",
+      "kind": "function",
+      "path": "tests/test_cclg_core.py",
+      "line": 52,
+      "signature": "def test_search_prefers_active_sparse_match(self)"
+    },
+    {
+      "name": "test_pack_excludes_suppressed_nodes",
+      "kind": "function",
+      "path": "tests/test_cclg_core.py",
+      "line": 69,
+      "signature": "def test_pack_excludes_suppressed_nodes(self)"
+    },
+    {
+      "name": "test_session_overlay_is_session_scoped",
+      "kind": "function",
+      "path": "tests/test_cclg_core.py",
+      "line": 91,
+      "signature": "def test_session_overlay_is_session_scoped(self)"
+    },
+    {
+      "name": "test_init_does_not_rewrite_existing_config",
+      "kind": "function",
+      "path": "tests/test_cclg_core.py",
+      "line": 105,
+      "signature": "def test_init_does_not_rewrite_existing_config(self)"
+    },
+    {
+      "name": "CCLGSurfaceTests",
+      "kind": "class",
+      "path": "tests/test_surfaces.py",
+      "line": 20,
+      "signature": "class CCLGSurfaceTests()"
+    },
+    {
+      "name": "test_code_graph_indexes_symbols",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 21,
+      "signature": "def test_code_graph_indexes_symbols(self)"
+    },
+    {
+      "name": "test_hook_returns_additional_context",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 30,
+      "signature": "def test_hook_returns_additional_context(self)"
+    },
+    {
+      "name": "test_pack_renders_compact_toml",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 48,
+      "signature": "def test_pack_renders_compact_toml(self)"
+    },
+    {
+      "name": "test_mcp_lists_and_calls_tools",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 58,
+      "signature": "def test_mcp_lists_and_calls_tools(self)"
+    },
+    {
+      "name": "test_benchmark_runner_passes_core_suites",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 81,
+      "signature": "def test_benchmark_runner_passes_core_suites(self)"
+    },
+    {
+      "name": "test_validate_reads_seed_jsonl_records",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 86,
+      "signature": "def test_validate_reads_seed_jsonl_records(self)"
+    },
+    {
+      "name": "test_validate_accepts_whole_demo_store",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 93,
+      "signature": "def test_validate_accepts_whole_demo_store(self)"
+    },
+    {
+      "name": "test_validate_reports_malformed_json_without_traceback",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 100,
+      "signature": "def test_validate_reports_malformed_json_without_traceback(self)"
+    },
+    {
+      "name": "test_cli_expected_errors_do_not_traceback",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 111,
+      "signature": "def test_cli_expected_errors_do_not_traceback(self)"
+    },
+    {
+      "name": "test_mcp_malformed_json_returns_parse_error",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 121,
+      "signature": "def test_mcp_malformed_json_returns_parse_error(self)"
+    },
+    {
+      "name": "test_doctor_and_audit_report_dangling_relations",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 130,
+      "signature": "def test_doctor_and_audit_report_dangling_relations(self)"
+    },
+    {
+      "name": "test_doctor_reports_malformed_session_json",
+      "kind": "function",
+      "path": "tests/test_surfaces.py",
+      "line": 145,
+      "signature": "def test_doctor_reports_malformed_session_json(self)"
+    }
+  ],
+  "edges": [
+    {
+      "source": "src/cclg/bench.py",
+      "target": "run_benchmarks",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_mutation",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_retrieval",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_hook",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_mcp",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "bench_codegraph",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "main",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/codegraph.py",
+      "kind": "imports",
+      "detail": ".codegraph"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/hooks.py",
+      "kind": "imports",
+      "detail": ".hooks"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/mcp_server.py",
+      "kind": "imports",
+      "detail": ".mcp_server"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/pack.py",
+      "kind": "imports",
+      "detail": ".pack"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/patches.py",
+      "kind": "imports",
+      "detail": ".patches"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/retrieval.py",
+      "kind": "imports",
+      "detail": ".retrieval"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "tempfile",
+      "kind": "imports",
+      "detail": "tempfile"
+    },
+    {
+      "source": "src/cclg/bench.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "build_parser",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "main",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "_main",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "import_jsonl",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "parse_scope",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "print_search_hits",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "grep_store",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "validate_paths",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "validate_record",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "is_evidence_path",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "parse_json_record",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "run_code_index",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "pack_markdown",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "doctor_report",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "audit_report",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "read_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "patch_diff",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "rollback_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "write_codex_skills",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "write_skill",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/bench.py",
+      "kind": "imports",
+      "detail": ".bench"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/codegraph.py",
+      "kind": "imports",
+      "detail": ".codegraph"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/pack.py",
+      "kind": "imports",
+      "detail": ".pack"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/patches.py",
+      "kind": "imports",
+      "detail": ".patches"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/retrieval.py",
+      "kind": "imports",
+      "detail": ".retrieval"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/schema.py",
+      "kind": "imports",
+      "detail": ".schema"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/session.py",
+      "kind": "imports",
+      "detail": ".session"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "argparse",
+      "kind": "imports",
+      "detail": "argparse"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/cli.py",
+      "target": "sys",
+      "kind": "imports",
+      "detail": "sys"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "CodeSymbol",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "CodeEdge",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "CodeGraph",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "to_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "from_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "build_code_graph",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "list_code_files",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "is_code_file",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "parse_symbols",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "parse_python_symbols",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "python_signature",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "parse_text_symbols",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "parse_imports",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "parse_python_imports",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "resolve_import",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "search_code_graph",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "render_code_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "save_code_graph",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "load_code_graph",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "language_for",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "read_text_safely",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "git_ls_files",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "git_churn",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "git_metadata",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "run_git",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "src/cclg/retrieval.py",
+      "kind": "imports",
+      "detail": ".retrieval"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "ast",
+      "kind": "imports",
+      "detail": "ast"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "dataclasses",
+      "kind": "imports",
+      "detail": "dataclasses"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "re",
+      "kind": "imports",
+      "detail": "re"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "subprocess",
+      "kind": "imports",
+      "detail": "subprocess"
+    },
+    {
+      "source": "src/cclg/codegraph.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/format.py",
+      "target": "toml_string",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/format.py",
+      "target": "source_label",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/format.py",
+      "target": "render_active_pack_toml",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/format.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/format.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "build_parser",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "main",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "read_stdin_json",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "user_prompt_context",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "ingest_event",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "markdown_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "extract_prompt",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "extract_session_id",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "src/cclg/codegraph.py",
+      "kind": "imports",
+      "detail": ".codegraph"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "src/cclg/pack.py",
+      "kind": "imports",
+      "detail": ".pack"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "src/cclg/session.py",
+      "kind": "imports",
+      "detail": ".session"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "argparse",
+      "kind": "imports",
+      "detail": "argparse"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "os",
+      "kind": "imports",
+      "detail": "os"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "sys",
+      "kind": "imports",
+      "detail": "sys"
+    },
+    {
+      "source": "src/cclg/hooks.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "main",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "handle_message",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "call_tool",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_search",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_grep",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_add",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_raw",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_code_index",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_code_search",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_bench",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_audit",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_result",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "tool_definitions",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "object_schema",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "error_response",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "iter_messages",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "write_message",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/bench.py",
+      "kind": "imports",
+      "detail": ".bench"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/codegraph.py",
+      "kind": "imports",
+      "detail": ".codegraph"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/pack.py",
+      "kind": "imports",
+      "detail": ".pack"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/patches.py",
+      "kind": "imports",
+      "detail": ".patches"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/retrieval.py",
+      "kind": "imports",
+      "detail": ".retrieval"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/schema.py",
+      "kind": "imports",
+      "detail": ".schema"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/session.py",
+      "kind": "imports",
+      "detail": ".session"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "argparse",
+      "kind": "imports",
+      "detail": "argparse"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "sys",
+      "kind": "imports",
+      "detail": "sys"
+    },
+    {
+      "source": "src/cclg/mcp_server.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "now_iso",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "new_id",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "default_scope",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "default_source",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "source_from_value",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "default_relations",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "default_retrieval",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "Provenance",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "from_value",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "MemoryNode",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "create",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "from_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "provenance",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "supersedes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "to_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "MemoryPatch",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "create",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "from_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "to_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "MemoryEdge",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "create",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "from_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "to_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "ActiveMemoryPack",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "to_dict",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "dataclasses",
+      "kind": "imports",
+      "detail": "dataclasses"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "datetime",
+      "kind": "imports",
+      "detail": "datetime"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/models.py",
+      "target": "uuid",
+      "kind": "imports",
+      "detail": "uuid"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "compile_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "src/cclg/patches.py",
+      "kind": "imports",
+      "detail": ".patches"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "src/cclg/retrieval.py",
+      "kind": "imports",
+      "detail": ".retrieval"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/pack.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "apply_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "active_nodes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "suppressed_nodes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/patches.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "tokenize",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "SearchHit",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "search_nodes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "collections",
+      "kind": "imports",
+      "detail": "collections"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "dataclasses",
+      "kind": "imports",
+      "detail": "dataclasses"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "math",
+      "kind": "imports",
+      "detail": "math"
+    },
+    {
+      "source": "src/cclg/retrieval.py",
+      "target": "re",
+      "kind": "imports",
+      "detail": "re"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "validate_node",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "validate_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "validate_edge",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "validate_session",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "validate_active_pack",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "missing_fields",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "is_source_grounded",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/schema.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "normalize_session_id",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "session_path",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "load_session",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "save_session",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "append_session_event",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "new_session_state",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "start_session",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "end_session",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "write_overlay_node",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "src/cclg/store.py",
+      "kind": "imports",
+      "detail": ".store"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/session.py",
+      "target": "uuid",
+      "kind": "imports",
+      "detail": "uuid"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "CCLGStore",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "__init__",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "init",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "write_node",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "read_node",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "iter_nodes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "write_patch",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "iter_patches",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "write_edge",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "iter_edges",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "append_raw",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "append_audit",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "_read_json",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "_write_json",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "src/cclg/format.py",
+      "kind": "imports",
+      "detail": ".format"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "src/cclg/models.py",
+      "kind": "imports",
+      "detail": ".models"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "json",
+      "kind": "imports",
+      "detail": "json"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "os",
+      "kind": "imports",
+      "detail": "os"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "src/cclg/store.py",
+      "target": "typing",
+      "kind": "imports",
+      "detail": "typing"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "CCLGCoreTests",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "test_patch_refine_suppresses_old_node",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "test_search_prefers_active_sparse_match",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "test_pack_excludes_suppressed_nodes",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "test_session_overlay_is_session_scoped",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "test_init_does_not_rewrite_existing_config",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.format",
+      "kind": "imports",
+      "detail": "cclg.format"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.models",
+      "kind": "imports",
+      "detail": "cclg.models"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.pack",
+      "kind": "imports",
+      "detail": "cclg.pack"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.patches",
+      "kind": "imports",
+      "detail": "cclg.patches"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.retrieval",
+      "kind": "imports",
+      "detail": "cclg.retrieval"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.session",
+      "kind": "imports",
+      "detail": "cclg.session"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "cclg.store",
+      "kind": "imports",
+      "detail": "cclg.store"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "tempfile",
+      "kind": "imports",
+      "detail": "tempfile"
+    },
+    {
+      "source": "tests/test_cclg_core.py",
+      "target": "unittest",
+      "kind": "imports",
+      "detail": "unittest"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "CCLGSurfaceTests",
+      "kind": "defines",
+      "detail": "class"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_code_graph_indexes_symbols",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_hook_returns_additional_context",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_pack_renders_compact_toml",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_mcp_lists_and_calls_tools",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_benchmark_runner_passes_core_suites",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_validate_reads_seed_jsonl_records",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_validate_accepts_whole_demo_store",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_validate_reports_malformed_json_without_traceback",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_cli_expected_errors_do_not_traceback",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_mcp_malformed_json_returns_parse_error",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_doctor_and_audit_report_dangling_relations",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "test_doctor_reports_malformed_session_json",
+      "kind": "defines",
+      "detail": "function"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "__future__",
+      "kind": "imports",
+      "detail": "__future__"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.bench",
+      "kind": "imports",
+      "detail": "cclg.bench"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.cli",
+      "kind": "imports",
+      "detail": "cclg.cli"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.codegraph",
+      "kind": "imports",
+      "detail": "cclg.codegraph"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.format",
+      "kind": "imports",
+      "detail": "cclg.format"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.hooks",
+      "kind": "imports",
+      "detail": "cclg.hooks"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.mcp_server",
+      "kind": "imports",
+      "detail": "cclg.mcp_server"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.models",
+      "kind": "imports",
+      "detail": "cclg.models"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.pack",
+      "kind": "imports",
+      "detail": "cclg.pack"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "cclg.store",
+      "kind": "imports",
+      "detail": "cclg.store"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "contextlib",
+      "kind": "imports",
+      "detail": "contextlib"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "io",
+      "kind": "imports",
+      "detail": "io"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "pathlib",
+      "kind": "imports",
+      "detail": "pathlib"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "tempfile",
+      "kind": "imports",
+      "detail": "tempfile"
+    },
+    {
+      "source": "tests/test_surfaces.py",
+      "target": "unittest",
+      "kind": "imports",
+      "detail": "unittest"
+    }
+  ]
+}

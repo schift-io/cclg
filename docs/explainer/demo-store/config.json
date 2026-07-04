@@ -1,0 +1,5 @@
+{
+  "schema_version": "cclg.store.v0.1",
+  "created_or_touched_at": "2026-06-30T10:03:12+00:00",
+  "root": "docs/explainer/demo-store"
+}

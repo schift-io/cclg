@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "command": "{{CCLG_BIN_DIR}}/cclg-hook user-prompt --include-codegraph --code-root \"$PWD\""
+      }
+    ],
+    "PostToolUse": [
+      {
+        "command": "{{CCLG_BIN_DIR}}/cclg-hook post-tool"
+      }
+    ],
+    "PreCompact": [
+      {
+        "command": "{{CCLG_BIN_DIR}}/cclg-hook pre-compact"
+      }
+    ],
+    "PostCompact": [
+      {
+        "command": "{{CCLG_BIN_DIR}}/cclg-hook post-compact"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "cclg.memory_patch.v0.1",
+  "id": "patch_ad5c337890c3",
+  "operation": "refine",
+  "target_ids": [
+    "mem_0524abcafba4"
+  ],
+  "new_node_ids": [
+    "mem_d6caa4a716ff"
+  ],
+  "reason": "사용자가 CCLG는 hook/tool에서 소비되는 source-grounded memory graph여야 한다고 정정했다.",
+  "new_content": "CCLG는 raw evidence를 보존하고, active MemoryNode만 hook/MCP context로 소비한다.",
+  "source": {
+    "label": "demo:correction",
+    "session_ids": [],
+    "turn_ids": [],
+    "raw_spans": [],
+    "tool_result_ids": [],
+    "artifact_ids": []
+  },
+  "confidence": 1.0,
+  "resolution_policy": {
+    "rule": "manual",
+    "auto_applied": true,
+    "requires_review": false
+  },
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "applied_at": "2026-06-30T09:58:47+00:00"
+}

@@ -1,0 +1,11 @@
+{
+  "event": "user_prompt",
+  "payload": {
+    "prompt": "CCLG format hook demo",
+    "raw": {
+      "prompt": "CCLG format hook demo",
+      "session_id": "demo-session"
+    }
+  },
+  "created_at": "2026-06-30T09:58:47+00:00"
+}

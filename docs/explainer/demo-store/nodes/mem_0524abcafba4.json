@@ -1,0 +1,59 @@
+{
+  "schema_version": "cclg.memory_node.v0.1",
+  "id": "mem_0524abcafba4",
+  "type": "project_decision",
+  "scope": {
+    "user": "user_local",
+    "org": null,
+    "workspace": null,
+    "project": null,
+    "agent": "global",
+    "session": null
+  },
+  "key": "demo.old.prompt_accumulation",
+  "content": "CCLG는 기억을 prompt 안에 직접 누적한다.",
+  "status": "superseded",
+  "confidence": 1.0,
+  "priority": "high",
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "updated_at": "2026-06-30T09:58:47+00:00",
+  "effective_from": "2026-06-30T09:58:47+00:00",
+  "effective_until": null,
+  "source": {
+    "label": "demo:old-assumption",
+    "session_ids": [],
+    "turn_ids": [],
+    "raw_spans": [],
+    "tool_result_ids": [],
+    "artifact_ids": []
+  },
+  "relations": {
+    "supersedes": [],
+    "superseded_by": [
+      "mem_d6caa4a716ff"
+    ],
+    "refines": [],
+    "expands": [],
+    "narrows": [],
+    "contradicts": [],
+    "depends_on": [],
+    "derived_from": []
+  },
+  "retrieval": {
+    "sparse_keys": [
+      "cclg는",
+      "prompt",
+      "기억을",
+      "누적한다"
+    ],
+    "dense_text": "CCLG는 기억을 prompt 안에 직접 누적한다.",
+    "entity_keys": [],
+    "temporal_keys": []
+  },
+  "metadata": {
+    "created_by": "manual",
+    "review_status": "auto_applied",
+    "privacy": "local_default"
+  },
+  "tags": []
+}

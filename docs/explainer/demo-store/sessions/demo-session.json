@@ -1,0 +1,42 @@
+{
+  "schema_version": "cclg.session.v0.1",
+  "id": "demo-session",
+  "agent": "codex",
+  "workspace": "local",
+  "project": "CCLG",
+  "started_at": "2026-06-30T09:58:47+00:00",
+  "ended_at": null,
+  "status": "active",
+  "parent_session_id": null,
+  "branch_name": "main",
+  "loaded_memory_ids": [],
+  "session_overlay_ids": [
+    "mem_abedb4edaeb1"
+  ],
+  "pending_patch_ids": [],
+  "active_task": {
+    "goal": "",
+    "open_questions": [],
+    "active_files": []
+  },
+  "policy": {
+    "promotion": "default",
+    "sync": "disabled",
+    "retention": "keep_raw_local"
+  },
+  "events": [
+    {
+      "event": "user_prompt",
+      "payload": {
+        "prompt": "CCLG format hook demo",
+        "raw": {
+          "prompt": "CCLG format hook demo",
+          "session_id": "demo-session"
+        }
+      },
+      "created_at": "2026-06-30T09:58:47+00:00"
+    }
+  ],
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "updated_at": "2026-06-30T09:58:47+00:00"
+}

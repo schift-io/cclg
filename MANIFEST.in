@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+recursive-include docs *.md *.html *.png
+recursive-include examples *.jsonl
+recursive-include adapters *.json
+recursive-include format *.toml

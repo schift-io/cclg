@@ -1,0 +1,67 @@
+{
+  "schema_version": "cclg.memory_node.v0.1",
+  "id": "mem_d6caa4a716ff",
+  "type": "project_decision",
+  "scope": {
+    "user": "user_local",
+    "org": null,
+    "workspace": null,
+    "project": null,
+    "agent": "global",
+    "session": null
+  },
+  "key": null,
+  "content": "CCLG는 raw evidence를 보존하고, active MemoryNode만 hook/MCP context로 소비한다.",
+  "status": "active",
+  "confidence": 1.0,
+  "priority": "normal",
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "updated_at": "2026-06-30T09:58:47+00:00",
+  "effective_from": "2026-06-30T09:58:47+00:00",
+  "effective_until": null,
+  "source": {
+    "label": "patch:patch_ad5c337890c3",
+    "session_ids": [],
+    "turn_ids": [],
+    "raw_spans": [],
+    "tool_result_ids": [],
+    "artifact_ids": [],
+    "quote": "사용자가 CCLG는 hook/tool에서 소비되는 source-grounded memory graph여야 한다고 정정했다."
+  },
+  "relations": {
+    "supersedes": [
+      "mem_0524abcafba4"
+    ],
+    "superseded_by": [],
+    "refines": [
+      "mem_0524abcafba4"
+    ],
+    "expands": [],
+    "narrows": [],
+    "contradicts": [],
+    "depends_on": [],
+    "derived_from": []
+  },
+  "retrieval": {
+    "sparse_keys": [
+      "active",
+      "cclg는",
+      "context로",
+      "evidence를",
+      "hook/mcp",
+      "memorynode만",
+      "raw",
+      "보존하고",
+      "소비한다"
+    ],
+    "dense_text": "CCLG는 raw evidence를 보존하고, active MemoryNode만 hook/MCP context로 소비한다.",
+    "entity_keys": [],
+    "temporal_keys": []
+  },
+  "metadata": {
+    "created_by": "manual",
+    "review_status": "auto_applied",
+    "privacy": "local_default"
+  },
+  "tags": []
+}

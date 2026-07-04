@@ -1,0 +1,58 @@
+{
+  "schema_version": "cclg.memory_node.v0.1",
+  "id": "mem_abedb4edaeb1",
+  "type": "memory",
+  "scope": {
+    "user": "user_local",
+    "org": null,
+    "workspace": "local",
+    "project": "CCLG",
+    "agent": "codex",
+    "session": "demo-session"
+  },
+  "key": null,
+  "content": "이 overlay memory는 demo-session pack에서만 보인다.",
+  "status": "active_session",
+  "confidence": 1.0,
+  "priority": "normal",
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "updated_at": "2026-06-30T09:58:47+00:00",
+  "effective_from": "2026-06-30T09:58:47+00:00",
+  "effective_until": null,
+  "source": {
+    "label": "demo:session-overlay",
+    "session_ids": [],
+    "turn_ids": [],
+    "raw_spans": [],
+    "tool_result_ids": [],
+    "artifact_ids": []
+  },
+  "relations": {
+    "supersedes": [],
+    "superseded_by": [],
+    "refines": [],
+    "expands": [],
+    "narrows": [],
+    "contradicts": [],
+    "depends_on": [],
+    "derived_from": []
+  },
+  "retrieval": {
+    "sparse_keys": [
+      "demo-session",
+      "memory는",
+      "overlay",
+      "pack에서만",
+      "보인다"
+    ],
+    "dense_text": "이 overlay memory는 demo-session pack에서만 보인다.",
+    "entity_keys": [],
+    "temporal_keys": []
+  },
+  "metadata": {
+    "created_by": "manual",
+    "review_status": "auto_applied",
+    "privacy": "local_default"
+  },
+  "tags": []
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": "cclg.edge.v0.1",
+  "id": "edge_abb6b33de5df",
+  "from": "mem_d6caa4a716ff",
+  "to": "mem_0524abcafba4",
+  "type": "refines",
+  "created_at": "2026-06-30T09:58:47+00:00",
+  "source_patch_id": "patch_ad5c337890c3"
+}

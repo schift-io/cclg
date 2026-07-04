@@ -1,0 +1,395 @@
+# CCLG format contract.
+# Canonical version: cclg.format.v0.1
+# Borrowed from dclg.xml / DocLang: explicit versioning, constrained
+# vocabulary, canonical order, validation gate, and token-aware output.
+
+[format]
+name = "CCLG"
+version = "0.1"
+id = "cclg.format.v0.1"
+namespace = "https://github.com/schift-io/cclg/ns/v0"
+status = "draft"
+encoding = "toml-contract"
+storage_encoding = "json"
+prompt_encoding = "toml"
+
+[lineage]
+source = "DocLang dclg.xml"
+source_version_reference = "0.6"
+references = [
+  "https://doclang.ai/",
+  "https://docling-project.github.io/docling/usage/supported_formats/",
+  "https://github.com/docling-project/docling"
+]
+borrowed = [
+  "root/version is mandatory",
+  "0.x minor versions are breaking",
+  "controlled vocabulary beats prose",
+  "canonical field order matters",
+  "token efficiency is a format constraint",
+  "validation is part of the format, not an afterthought"
+]
+adapted = [
+  "document elements -> memory graph records",
+  "XML namespace -> CCLG namespace",
+  "element location/source -> source.raw_spans",
+  "DocLang validator -> cclg validate and cclg doctor",
+  "document order -> prompt pack order"
+]
+
+[versions]
+format = "cclg.format.v0.1"
+store = "cclg.store.v0.1"
+memory_node = "cclg.memory_node.v0.1"
+memory_patch = "cclg.memory_patch.v0.1"
+memory_edge = "cclg.edge.v0.1"
+active_memory_pack = "cclg.active_memory_pack.v0.1"
+code_graph = "cclg.code_graph.v0.1"
+session = "cclg.session.v0.1"
+hook_output = "cclg.hook_output.v0.1"
+
+[compatibility]
+rule = "0.x minor bump is breaking"
+compatible_with = []
+breaking_change_requires = "new minor version, migration note, and validator update"
+
+[vocabulary]
+node_type = [
+  "preference",
+  "identity_fact",
+  "project_fact",
+  "project_decision",
+  "task",
+  "commitment",
+  "correction",
+  "constraint",
+  "tool_result",
+  "artifact_reference",
+  "code_state",
+  "warning",
+  "relationship",
+  "temporal_event",
+  "runbook",
+  "benchmark_requirement",
+  "memory"
+]
+node_status = [
+  "active",
+  "pending",
+  "superseded",
+  "deprecated",
+  "expired",
+  "forgotten",
+  "conflict_pending",
+  "active_session",
+  "pending_promotion",
+  "promoted",
+  "discarded"
+]
+patch_operation = [
+  "create",
+  "update",
+  "supersede",
+  "refine",
+  "expand",
+  "narrow",
+  "merge",
+  "split",
+  "expire",
+  "deprecate",
+  "forget",
+  "resolve_conflict",
+  "rollback"
+]
+edge_kind = [
+  "supersedes",
+  "refines",
+  "expands",
+  "narrows",
+  "contradicts",
+  "depends_on",
+  "derived_from",
+  "temporary_override",
+  "source_of",
+  "blocks",
+  "resolves",
+  "defines",
+  "imports"
+]
+hook_event = ["user-prompt", "post-tool", "pre-compact", "post-compact", "session-start", "stop"]
+mcp_tool = [
+  "cclg.search",
+  "cclg.grep",
+  "cclg.bm25",
+  "cclg.pack",
+  "cclg.add",
+  "cclg.patch",
+  "cclg.raw",
+  "cclg.code_index",
+  "cclg.code_search",
+  "cclg.audit",
+  "cclg.bench",
+  "memory.search",
+  "memory.grep",
+  "memory.bm25",
+  "memory.pack",
+  "memory.patch",
+  "memory.audit"
+]
+
+[paths]
+root = "${CCLG_HOME:-~/.cclg}"
+raw = "raw/{safe_name}"
+memory_node = "nodes/{memory_node.id}.json"
+memory_patch = "patches/{memory_patch.id}.json"
+memory_edge = "edges/{memory_edge.id}.json"
+session = "sessions/{session.id}.json"
+code_graph = "active/codegraphs/{repo_name}.json"
+audit = "audit/memory_audit.jsonl"
+
+[record.memory_node]
+schema_version = "cclg.memory_node.v0.1"
+path = "nodes/{id}.json"
+canonical_order = [
+  "schema_version",
+  "id",
+  "type",
+  "scope",
+  "key",
+  "content",
+  "status",
+  "confidence",
+  "priority",
+  "created_at",
+  "updated_at",
+  "effective_from",
+  "effective_until",
+  "source",
+  "relations",
+  "retrieval",
+  "metadata",
+  "tags"
+]
+required = [
+  "schema_version",
+  "id",
+  "type",
+  "scope",
+  "key",
+  "content",
+  "status",
+  "confidence",
+  "priority",
+  "created_at",
+  "updated_at",
+  "effective_from",
+  "effective_until",
+  "source",
+  "relations",
+  "retrieval",
+  "metadata"
+]
+
+[record.memory_node.fields]
+schema_version = "const:cclg.memory_node.v0.1"
+id = "id:mem_*"
+type = "enum:node_type"
+scope = "{user,org,workspace,project,agent,session}"
+key = "string|null"
+content = "string:min=1"
+status = "enum:node_status"
+confidence = "float:0..1"
+priority = "string"
+created_at = "datetime"
+updated_at = "datetime"
+effective_from = "datetime"
+effective_until = "datetime|null"
+source = "source"
+relations = "relations"
+retrieval = "retrieval"
+metadata = "map"
+tags = "list:string"
+
+[record.source]
+canonical_order = ["label", "session_ids", "turn_ids", "raw_spans", "tool_result_ids", "artifact_ids", "quote"]
+required = ["session_ids", "turn_ids", "raw_spans", "tool_result_ids", "artifact_ids"]
+
+[record.source.fields]
+label = "string|null; local compatibility field"
+session_ids = "list:string"
+turn_ids = "list:string"
+raw_spans = "list:{source_id,turn_id,char_start,char_end}"
+tool_result_ids = "list:string"
+artifact_ids = "list:string"
+quote = "string|null"
+
+[record.relations]
+canonical_order = [
+  "supersedes",
+  "superseded_by",
+  "refines",
+  "expands",
+  "narrows",
+  "contradicts",
+  "depends_on",
+  "derived_from"
+]
+value = "map:list:id:mem_*"
+
+[record.retrieval]
+canonical_order = ["sparse_keys", "dense_text", "entity_keys", "temporal_keys"]
+required = ["sparse_keys", "dense_text", "entity_keys", "temporal_keys"]
+
+[record.memory_patch]
+schema_version = "cclg.memory_patch.v0.1"
+path = "patches/{id}.json"
+canonical_order = [
+  "schema_version",
+  "id",
+  "operation",
+  "target_ids",
+  "new_node_ids",
+  "reason",
+  "new_content",
+  "source",
+  "confidence",
+  "resolution_policy",
+  "created_at",
+  "applied_at"
+]
+required = [
+  "schema_version",
+  "id",
+  "operation",
+  "target_ids",
+  "new_node_ids",
+  "reason",
+  "source",
+  "confidence",
+  "resolution_policy",
+  "created_at",
+  "applied_at"
+]
+
+[record.memory_patch.fields]
+schema_version = "const:cclg.memory_patch.v0.1"
+id = "id:patch_*"
+operation = "enum:patch_operation"
+target_ids = "list:id:mem_*; required_except=create"
+new_node_ids = "list:id:mem_*"
+reason = "string"
+new_content = "string|null; required_non_null_for=create,update,supersede,refine,expand,narrow,merge,split,resolve_conflict"
+source = "source"
+confidence = "float:0..1"
+resolution_policy = "{rule,auto_applied,requires_review}"
+created_at = "datetime"
+applied_at = "datetime|null"
+
+[record.memory_edge]
+schema_version = "cclg.edge.v0.1"
+path = "edges/{id}.json"
+canonical_order = ["schema_version", "id", "from", "to", "type", "created_at", "source_patch_id"]
+required = ["schema_version", "id", "from", "to", "type", "created_at", "source_patch_id"]
+
+[record.memory_edge.fields]
+schema_version = "const:cclg.edge.v0.1"
+id = "id:edge_*"
+from = "id:mem_*"
+to = "id:mem_*"
+type = "enum:edge_kind"
+created_at = "datetime"
+source_patch_id = "id:patch_*|null"
+
+[record.active_memory_pack]
+schema_version = "cclg.active_memory_pack.v0.1"
+path = "runtime"
+canonical_order = [
+  "schema_version",
+  "query",
+  "generated_at",
+  "memory_nodes",
+  "suppressed_nodes",
+  "budget"
+]
+required = ["schema_version", "query", "generated_at", "memory_nodes", "suppressed_nodes", "budget"]
+
+[record.active_memory_pack.fields]
+schema_version = "const:cclg.active_memory_pack.v0.1"
+query = "string"
+generated_at = "datetime"
+memory_nodes = "list:memory_node(status=active|active_session-for-current-session)"
+suppressed_nodes = "list:{id,status,content,supersedes}; status not in active"
+budget = "{max_nodes:int,max_chars:int,used_chars:int}"
+
+[record.session]
+schema_version = "cclg.session.v0.1"
+path = "sessions/{id}.json"
+canonical_order = [
+  "schema_version",
+  "id",
+  "agent",
+  "workspace",
+  "project",
+  "started_at",
+  "ended_at",
+  "status",
+  "parent_session_id",
+  "branch_name",
+  "loaded_memory_ids",
+  "session_overlay_ids",
+  "pending_patch_ids",
+  "active_task",
+  "policy",
+  "events",
+  "created_at",
+  "updated_at"
+]
+required = [
+  "schema_version",
+  "id",
+  "agent",
+  "workspace",
+  "project",
+  "started_at",
+  "ended_at",
+  "status",
+  "parent_session_id",
+  "branch_name",
+  "loaded_memory_ids",
+  "session_overlay_ids",
+  "pending_patch_ids",
+  "active_task",
+  "policy",
+  "events",
+  "created_at",
+  "updated_at"
+]
+
+[record.code_graph]
+schema_version = "cclg.code_graph.v0.1"
+path = "active/codegraphs/{repo_name}.json"
+canonical_order = ["schema_version", "root", "generated_at", "git", "files", "symbols", "edges"]
+required = ["schema_version", "root", "generated_at", "git", "files", "symbols", "edges"]
+
+[record.hook_output]
+schema_version = "cclg.hook_output.v0.1"
+path = "stdout"
+canonical_order = ["schema_version", "continue", "hookSpecificOutput", "cclg"]
+required = ["schema_version", "continue", "cclg"]
+
+[prompt.active_memory_pack_toml]
+header = "cclg.active_memory_pack.v0.1"
+emit_fields = ["id", "type", "status", "source", "content"]
+suppressed_policy = "emit only id,status,content_prefix; never as active truth"
+max_content_chars_default = 6000
+
+[validation]
+doctor_checks = [
+  "schema_version matches record type",
+  "long-term node has source label or source raw span",
+  "relation target ids exist",
+  "patch target_ids and new_node_ids exist",
+  "edge endpoints and source_patch_id exist",
+  "active node supersedes targets are not active",
+  "suppressed nodes are never emitted as active memory"
+]

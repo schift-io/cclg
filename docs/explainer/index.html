@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CCLG 데이터 모델과 훅 소비 흐름</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f6f8;
+        --ink: #111827;
+        --muted: #566070;
+        --line: #d5dbe5;
+        --panel: #ffffff;
+        --soft: #eef3f7;
+        --green: #0f8b6f;
+        --blue: #2563eb;
+        --orange: #d97706;
+        --red: #dc2626;
+        --violet: #6d28d9;
+        --slate: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Apple SD Gothic Neo", "Noto Sans KR", Inter, ui-sans-serif,
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      code {
+        font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+      }
+
+      .page {
+        width: 1440px;
+        min-height: 2300px;
+        padding: 52px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 40px;
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        font-size: 21px;
+        line-height: 1.25;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        font-size: 15px;
+        line-height: 1.25;
+      }
+
+      .subtitle {
+        margin-top: 14px;
+        max-width: 900px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.55;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      .wide {
+        grid-column: 1 / -1;
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .model-row {
+        display: grid;
+        grid-template-columns: 170px 1fr 1fr 1fr;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        padding: 14px;
+        align-items: start;
+      }
+
+      .model-head {
+        display: grid;
+        grid-template-columns: 170px 1fr 1fr 1fr;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 0 14px;
+      }
+
+      .badge {
+        display: inline-flex;
+        width: max-content;
+        max-width: 100%;
+        min-height: 28px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        padding: 5px 12px;
+        white-space: nowrap;
+      }
+
+      .blue {
+        background: var(--blue);
+      }
+
+      .green {
+        background: var(--green);
+      }
+
+      .orange {
+        background: var(--orange);
+      }
+
+      .red {
+        background: var(--red);
+      }
+
+      .violet {
+        background: var(--violet);
+      }
+
+      .slate {
+        background: var(--slate);
+      }
+
+      .cell-title {
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+
+      .cell-text {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+      }
+
+      .step {
+        position: relative;
+        min-height: 170px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        padding: 42px 14px 14px;
+      }
+
+      .step::before {
+        content: attr(data-step);
+        position: absolute;
+        left: 14px;
+        top: 13px;
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .step strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.28;
+        margin-bottom: 7px;
+      }
+
+      .step span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .matrix {
+        display: grid;
+        grid-template-columns: 190px repeat(5, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .matrix div {
+        min-height: 54px;
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+        background: var(--soft);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .matrix div:nth-child(6n) {
+        border-right: 0;
+      }
+
+      .matrix .head {
+        background: #e5ebf2;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .matrix .cmd {
+        background: #fff;
+        font-weight: 800;
+      }
+
+      .yes {
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      .warn {
+        color: var(--orange);
+        font-weight: 800;
+      }
+
+      .no {
+        color: var(--muted);
+      }
+
+      .cards3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .cards4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .mini {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        padding: 16px;
+        min-height: 160px;
+      }
+
+      .mini h3 {
+        margin-top: 9px;
+        margin-bottom: 8px;
+      }
+
+      .mini ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .footer {
+        margin-top: 22px;
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <div>
+          <h1>CCLG는 기억을 파일로 저장하고, 훅에서 필요한 순간만 꺼내 씁니다.</h1>
+          <p class="subtitle">
+            Format: <code>cclg.format.v0.1</code>. 원본 증거는 <code>raw/</code>에 남기고, 장기 기억은 <code>MemoryNode</code>로 저장합니다.
+            수정은 <code>MemoryPatch</code>와 <code>MemoryEdge</code>로 기록되며, 에이전트는 훅과 MCP를 통해
+            <code>ActiveMemoryPack</code>과 <code>CodeGraphPack</code>만 소비합니다.
+          </p>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div class="card wide">
+          <h2>데이터 모델, 저장 위치, 참조 시점</h2>
+          <div class="stack">
+            <div class="model-head">
+              <div>모델 / 경로</div>
+              <div>주요 필드</div>
+              <div>언제 쓰이나</div>
+              <div>언제 읽히나</div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge blue">raw/</span></div>
+              <div>
+                <div class="cell-title">원본 증거</div>
+                <div class="cell-text">파일명, 원문, JSON hook payload, tool output, compact record. 기억의 최종 근거입니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>cclg raw</code>, <code>append_session_event()</code>, import/hook 이벤트가 append-only로 저장합니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text"><code>source.raw_spans</code> 검증, 감사, 디버깅에서 참조합니다. 기본 prompt에는 직접 주입하지 않습니다.</div>
+              </div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge green">nodes/</span></div>
+              <div>
+                <div class="cell-title">MemoryNode</div>
+                <div class="cell-text"><code>scope</code>, <code>key</code>, <code>content</code>, <code>status</code>, <code>source</code>, <code>relations</code>, <code>retrieval</code>.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>cclg add</code>, <code>import-jsonl</code>, <code>apply_patch()</code>가 JSON 파일로 저장합니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text"><code>search</code>, <code>pack</code>, <code>hook user-prompt</code>, <code>cclg.search</code>, <code>cclg.pack</code>이 active만 검색합니다.</div>
+              </div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge orange">patches/</span></div>
+              <div>
+                <div class="cell-title">MemoryPatch</div>
+                <div class="cell-text"><code>operation</code>, <code>target_ids</code>, <code>new_node_ids</code>, <code>reason</code>, <code>resolution_policy</code>. 변경 의도 자체를 기록합니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>cclg patch</code>, <code>memory.patch</code> tool이 만들고 <code>write_patch()</code>가 audit까지 남깁니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text">직접 prompt 주입이 아니라 node 상태 변경의 근거입니다. <code>doctor</code>, audit, <code>diff</code>에서 참조합니다.</div>
+              </div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge slate">edges/</span></div>
+              <div>
+                <div class="cell-title">MemoryEdge</div>
+                <div class="cell-text"><code>from</code>, <code>to</code>, <code>type</code>, <code>source_patch_id</code>. 새 기억이 어떤 기존 기억을 어떻게 바꿨는지 남깁니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>apply_patch()</code>가 <code>refines</code>, <code>supersedes</code>, <code>expands</code>, <code>narrows</code> edge를 작성합니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text"><code>doctor</code>, audit, graph traversal, 사용자 설명에서 변경 경로를 추적합니다.</div>
+              </div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge violet">active/</span></div>
+              <div>
+                <div class="cell-title">ActiveMemoryPack / CodeGraph</div>
+                <div class="cell-text">query, generated_at, memory_nodes, suppressed_nodes, budget, files, symbols, edges, git_churn.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>compile_pack()</code>은 즉시 생성하고, <code>code-index</code>와 hook은 <code>active/codegraphs/*.json</code>을 저장합니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text">훅의 <code>additionalContext</code>, MCP tool 결과, CLI TOML 출력으로 에이전트가 직접 소비합니다.</div>
+              </div>
+            </div>
+
+            <div class="model-row">
+              <div><span class="badge red">sessions/ audit/</span></div>
+              <div>
+                <div class="cell-title">SessionEvent / Audit</div>
+                <div class="cell-text">session id, event, payload, created_at, patch_written, raw_written, session_event.</div>
+              </div>
+              <div>
+                <div class="cell-title">쓰기</div>
+                <div class="cell-text"><code>user-prompt</code>, <code>post-tool</code>, <code>pre-compact</code>, <code>post-compact</code>가 모든 이벤트를 남깁니다.</div>
+              </div>
+              <div>
+                <div class="cell-title">읽기</div>
+                <div class="cell-text">나중에 memory distill, 재현, 오류 추적, 변경 원인 분석에서 참조합니다. 기본 active memory와 분리합니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>훅에서 실제로 언제 참조되는가</h2>
+          <div class="flow">
+            <div class="step" data-step="1">
+              <strong>사용자가 prompt 입력</strong>
+              <span>Codex/Claude hook이 JSON payload를 <code>cclg-hook user-prompt</code>로 전달합니다.</span>
+            </div>
+            <div class="step" data-step="2">
+              <strong>session/raw 먼저 기록</strong>
+              <span><code>append_session_event()</code>가 <code>sessions/</code>, <code>raw/</code>, <code>audit/</code>에 이벤트를 남깁니다.</span>
+            </div>
+            <div class="step" data-step="3">
+              <strong>active node만 검색</strong>
+              <span><code>active_nodes()</code>와 <code>search_nodes()</code>가 <code>status=active</code>인 node만 고릅니다.</span>
+            </div>
+            <div class="step" data-step="4">
+              <strong>ActiveMemoryPack 생성</strong>
+              <span><code>compile_pack()</code>이 현재 query 기준 기억과 suppressed 목록을 분리합니다.</span>
+            </div>
+            <div class="step" data-step="5">
+              <strong>코드그래프 선택</strong>
+              <span><code>--include-codegraph</code>이면 git 파일, symbol, import edge, churn을 뽑습니다.</span>
+            </div>
+            <div class="step" data-step="6">
+              <strong>additionalContext 반환</strong>
+              <span>에이전트가 읽는 것은 원본 전체가 아니라 active memory와 code pack 요약입니다.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>실제 demo-store로 검증되는 흐름</h2>
+          <div class="cards4">
+            <div class="mini">
+              <span class="badge red">Old</span>
+              <h3><code>nodes/mem_0524abcafba4.json</code></h3>
+              <ul>
+                <li>content: prompt에 직접 누적한다</li>
+                <li>status: <code>superseded</code></li>
+                <li>현재 truth로 주입되면 안 됨</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <span class="badge orange">Patch</span>
+              <h3><code>patches/patch_ad5c337890c3.json</code></h3>
+              <ul>
+                <li>operation: <code>refine</code></li>
+                <li>target_ids가 old node를 가리킴</li>
+                <li>new_node_ids와 변경 이유가 파일로 남음</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <span class="badge green">Active</span>
+              <h3><code>nodes/mem_d6caa4a716ff.json</code></h3>
+              <ul>
+                <li>content: raw evidence + active node 소비</li>
+                <li>status: <code>active</code></li>
+                <li><code>relations.refines</code>가 old node를 참조</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <span class="badge blue">Hook</span>
+              <h3><code>sessions/demo-session.json</code></h3>
+              <ul>
+                <li>prompt event가 raw/session/audit에 저장</li>
+                <li>active 1개, suppressed 1개 반환</li>
+                <li>edge는 <code>edges/</code>, codegraph는 <code>active/codegraphs/</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>명령과 Tool이 어떤 모델을 읽고 쓰는가</h2>
+          <div class="matrix">
+            <div class="head">명령 / Tool</div>
+            <div class="head">raw</div>
+            <div class="head">nodes</div>
+            <div class="head">patches</div>
+            <div class="head">active/codegraph</div>
+            <div class="head">sessions/audit</div>
+
+            <div class="cmd"><code>cclg add</code></div>
+            <div class="no">직접 쓰지 않음</div>
+            <div class="yes">MemoryNode 작성</div>
+            <div class="no">-</div>
+            <div class="no">-</div>
+            <div class="warn">간접 audit 없음</div>
+
+            <div class="cmd"><code>cclg raw</code></div>
+            <div class="yes">원본 파일 저장</div>
+            <div class="no">-</div>
+            <div class="no">-</div>
+            <div class="no">-</div>
+            <div class="yes">raw_written</div>
+
+            <div class="cmd"><code>cclg patch</code></div>
+            <div class="no">-</div>
+            <div class="yes">target 상태 변경 + 새 node</div>
+            <div class="yes">MemoryPatch + Edge 작성</div>
+            <div class="no">다음 pack에서 반영</div>
+            <div class="yes">patch_written</div>
+
+            <div class="cmd"><code>cclg pack/search</code></div>
+            <div class="no">기본 미참조</div>
+            <div class="yes">active만 읽음</div>
+            <div class="no">상태 결과만 반영</div>
+            <div class="yes">pack 즉시 생성</div>
+            <div class="no">-</div>
+
+            <div class="cmd"><code>cclg-hook user-prompt</code></div>
+            <div class="yes">prompt event 저장</div>
+            <div class="yes">active 검색</div>
+            <div class="no">직접 주입 안 함</div>
+            <div class="yes">additionalContext 생성</div>
+            <div class="yes">session_event</div>
+
+            <div class="cmd"><code>cclg-mcp</code></div>
+            <div class="yes">raw tool 가능</div>
+            <div class="yes">search/add/pack</div>
+            <div class="yes">patch</div>
+            <div class="yes">code_search 등</div>
+            <div class="warn">도구별로 다름</div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>에이전트가 소비하는 출력 단위</h2>
+          <div class="cards3">
+            <div class="mini">
+              <span class="badge green">Memory</span>
+              <h3>ActiveMemoryPack</h3>
+              <ul>
+                <li>현재 task query 기준 active memory</li>
+                <li>superseded/expired/forgotten은 별도 표시</li>
+                <li>hook과 MCP가 prompt context로 사용</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <span class="badge violet">Code</span>
+              <h3>CodeGraphPack</h3>
+              <ul>
+                <li>repo file, symbol, import/define edge</li>
+                <li>git churn으로 변경 가능성 보정</li>
+                <li>읽을 파일 순서를 정하는 힌트</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <span class="badge blue">Schema</span>
+              <h3>Format Contract</h3>
+              <ul>
+                <li>cclg.format.v0.1</li>
+                <li>format/cclg.format.v0.1.toml</li>
+                <li>hook output 구조까지 문서화</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span>Install: <code>curl -fsSL https://raw.githubusercontent.com/schift-io/cclg/main/scripts/install.sh | bash</code></span>
+        <span>상세 스펙: <code>format/cclg.format.v0.1.toml</code>, <code>docs/FORMAT.md</code></span>
+      </div>
+    </main>
+  </body>
+</html>

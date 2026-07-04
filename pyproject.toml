@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cclg"
+version = "0.1.0"
+description = "Local-first memory, hook, MCP, and code graph runtime for coding agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Room821" }]
+keywords = ["agent", "memory", "mcp", "codex", "claude-code", "codegraph", "repo-map"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Version Control :: Git",
+  "Topic :: Text Processing :: Indexing",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# Optional on-device dense retrieval. Off by default; no network egress unless enabled.
+dense = ["sentence-transformers>=2.2"]
+
+[project.urls]
+Homepage = "https://github.com/schift-io/cclg"
+Repository = "https://github.com/schift-io/cclg"
+Issues = "https://github.com/schift-io/cclg/issues"
+Documentation = "https://github.com/schift-io/cclg/tree/main/docs"
+
+[project.scripts]
+cclg = "cclg.cli:main"
+acmc = "cclg.cli:main"
+cclg-hook = "cclg.hooks:main"
+cclg-mcp = "cclg.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
