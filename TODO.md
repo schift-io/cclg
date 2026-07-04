@@ -26,8 +26,13 @@ See `docs/CCLG_CONTAINER_PLAN.md` for rationale and spec.
 
 ### P2 — Producer wiring (close the pipeline)
 
-- [ ] `cclg export schift --session/--pack-query/--node` emits a `.cclg` payload
-      (no Schift auth fields).
+- [x] `cclg export schift --session/--node` emits a `.cclg` payload (no Schift
+      auth fields). Backed by `container.pack_for_export` (filters
+      nodes/patches/edges/sessions to the requested session/node ids, reusing
+      `pack_container`'s existing auth-free guard + schema validation — no
+      separate packing path). `--pack-query` deferred: not yet needed by any
+      producer; add when a caller needs an arbitrary-query slice instead of
+      explicit session/node id selection.
 - [ ] Local end-to-end smoke: `.cclg` -> `createCclgAiMemoryEvent` envelope.
 
 ### P3 — schift-memory as lossless loader (schift-ai-memory repo)
@@ -41,12 +46,12 @@ See `docs/CCLG_CONTAINER_PLAN.md` for rationale and spec.
 
 ### P4 — GateMem Office
 
-- [ ] Mode 1 (CCLG local) adapter -> real `predictions.jsonl` via container round-trip.
+- [x] Mode 1 (CCLG local) adapter -> real `predictions.jsonl` via container round-trip. 547/547 checkpoints, deterministic (byte-identical reruns), 0 leak violations (internal + post-hoc leak-target). LLM judge scoring for utility deferred (no paid calls in Mode 1 harness).
 - [ ] Mode 2 (Schift hosted) after P3.
 - [ ] Mode 3 (Combined) once P2 + P3 land. Report the three scores separately.
 
 ## Known Open Threads (pre-existing)
 
-- [ ] `cclg export schift` did not exist in CCLG CLI (blocks CCLG-local / Combined).
+- [x] `cclg export schift` did not exist in CCLG CLI (blocks CCLG-local / Combined). Resolved — see P2 above.
 - [ ] Envelope-side adapter work continues in the schift-ai-memory wrapper.
 - [ ] Hosted upload/search smoke still pending on the wrapper side.

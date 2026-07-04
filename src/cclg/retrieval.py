@@ -90,7 +90,9 @@ def search_nodes(query: str, nodes: list[MemoryNode], *, limit: int = 10) -> lis
         if score > 0:
             hits.append(SearchHit(node=node, score=score, reasons=sorted(set(reasons))))
 
-    hits.sort(key=lambda hit: (hit.score, hit.node.updated_at), reverse=True)
+    # node.id as the final tiebreak: equal-score hits must rank identically
+    # across runs regardless of store directory enumeration order.
+    hits.sort(key=lambda hit: (hit.score, hit.node.updated_at, hit.node.id), reverse=True)
     return hits[:limit]
 
 
@@ -128,7 +130,7 @@ def graph_search(query: str, nodes: list[MemoryNode], *, limit: int = 10) -> lis
                 if neighbor is None or neighbor.id in scored:
                     continue
                 scored[neighbor.id] = SearchHit(node=neighbor, score=hit.score * 0.5, reasons=[f"graph:{relation}"])
-    ranked = sorted(scored.values(), key=lambda hit: hit.score, reverse=True)
+    ranked = sorted(scored.values(), key=lambda hit: (hit.score, hit.node.updated_at, hit.node.id), reverse=True)
     return ranked[:limit]
 
 
@@ -158,7 +160,9 @@ def temporal_search(query: str, nodes: list[MemoryNode], *, as_of: datetime | No
         SearchHit(node=node, score=lexical.get(node.id, 0.0) + _recency_score(node), reasons=["temporal"])
         for node in candidates
     ]
-    hits.sort(key=lambda hit: (hit.score, hit.node.updated_at), reverse=True)
+    # node.id as the final tiebreak: equal-score hits must rank identically
+    # across runs regardless of store directory enumeration order.
+    hits.sort(key=lambda hit: (hit.score, hit.node.updated_at, hit.node.id), reverse=True)
     return hits[:limit]
 
 
@@ -192,7 +196,7 @@ def fuse_results(results: dict[str, list[SearchHit]], *, k: int = 60, limit: int
             nodes[hit.node.id] = hit.node
             fused[hit.node.id] = fused.get(hit.node.id, 0.0) + 1.0 / (k + rank + 1)
             reasons.setdefault(hit.node.id, []).append(mode)
-    ranked = sorted(fused.items(), key=lambda item: item[1], reverse=True)
+    ranked = sorted(fused.items(), key=lambda item: (item[1], item[0]), reverse=True)
     return [SearchHit(node=nodes[node_id], score=round(score, 6), reasons=reasons[node_id]) for node_id, score in ranked[:limit]]
 
 
