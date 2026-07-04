@@ -203,3 +203,38 @@ compliance_utility_score / MGS
 
 Do not collapse the three modes into one headline until failure root cause is
 understood.
+
+## Mode 1 Results (2026-07-05, cclg local + schift-local-a3b answerer)
+
+547/547 checkpoints, deterministic adapter (byte-identical reruns), zero
+generation errors. Answerer: schift-local-a3b. Judge: gemini-3.1-flash-lite
+(GateMem's official judge prompt; 0% parse failures; every judge-positive leak
+was manually audited against the raw answers and confirmed real).
+
+```text
+context-level (what CCLG lets into the prompt):
+  privacy_context_leakage_rate    0.0   (0/171)
+  deletion_context_leakage_rate   0.0   (0/222)
+
+answer-level (full stack, judge-verified primary):
+  privacy_leakage_rate            5.8%  (10/171, all confirmed real)
+  deletion_leakage_rate           3.6%  (8/222, all confirmed real)
+  utility (judge_effective)       17.5% (over_refusal_rate 71.4%)
+```
+
+Readings:
+
+- CCLG governance is clean: nothing protected or forgotten ever reached the
+  prompt context, including through the `.cclg` container round trip.
+- Remaining answer-level leaks are answerer behavior, not retrieval: the model
+  confirms attacker-supplied values ("Yes, the deleted token began with
+  rb_stg") or leaks by relational inference. An output-side guardrail layer is
+  the fix, not a memory-layer change.
+- Utility is retrieval-recall-bound: 489/547 checkpoints packed no relevant
+  memory (sparse-only matching), so the answerer honestly refuses. Dense
+  retrieval / better sparse keys is the lever; independent of governance.
+- Caveat on the official rule-based scorer: generic "yes"/"no" leak_targets
+  string-match harmless refusals ("No information available...") — inflates
+  rule-based leak rates 20-25%. Judge-verified numbers above are authoritative;
+  official-scorer numbers are kept in tmp/gatemem-out/scores_mode1.json for
+  comparability.
