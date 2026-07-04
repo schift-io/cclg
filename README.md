@@ -194,10 +194,10 @@ all of them:
         v                 v                      v
 +------------------+  +--------------------+  +----------------------+
 | coding agents    |  | agent runtimes     |  | hosted memory        |
-|                  |  |                    |  |                      |
-| Claude Code      |  | Schift APM         |  | Schift AI Memory     |
-| Codex            |  | (agent packs)      |  | (TS loader)          |
-| Hermes           |  |                    |  |                      |
+|                  |  | (APM agent packs)  |  |                      |
+| Claude Code      |  |                    |  | example:             |
+| Codex            |  | example:           |  |  Schift AI Memory    |
+| Hermes           |  |  Schift runtime    |  |                      |
 |                  |  |                    |  |                      |
 | hooks + MCP      |  | store-less library |  | lossless container   |
 | ~/.cclg store    |  | over tenant memory |  | load + effective-    |
@@ -213,10 +213,11 @@ patches; the hook injects only the active effective view as an
 ActiveMemoryPack. Hermes and other agent-workbench hosts integrate the same
 way: hook on user prompt, MCP tools for explicit memory/patch/search calls.
 
-### With APM (Schift agent runtime)
+### With an APM agent runtime (example: Schift)
 
-Schift's APM runtime consumes CCLG as a store-less library over its own
-tenant-scoped memory store — no second store, no sync:
+Runtimes that execute APM agent packages can bind CCLG as their memory layer.
+Schift's runtime does exactly this — it consumes CCLG as a store-less library
+over its own tenant-scoped memory store, no second store, no sync:
 
 ```text
 tenant memory store (single source of truth)
@@ -232,7 +233,7 @@ The pack is what the agent actually reads: stable ordering keeps provider
 prompt caches warm, and the budget keeps token spend bounded. The export means
 an agent's memory is never locked in — it is a file.
 
-### With hosted memory (Schift AI Memory)
+### With hosted memory (example: Schift AI Memory)
 
 The hosted wrapper loads `.cclg` containers losslessly: the container bytes are
 preserved verbatim (patches and edges stay first-class records), and the
@@ -242,7 +243,7 @@ never a second source of truth.
 ### Bring your own runtime
 
 The core stays host-agnostic. Runtime-specific install paths and host adapters
-(a new agent host's hook config, an APM-style runtime binding) land as pull
+(a new agent host's hook config, an APM pack-runtime binding) land as pull
 requests: adapters live under `adapters/<host>/`, integration docs under
 `docs/`. If your runtime can read JSON and verify a sha256, it can speak
 `.cclg`.
