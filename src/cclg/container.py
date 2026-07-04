@@ -84,6 +84,31 @@ class ContainerBundle:
     def memory_edges(self) -> list[MemoryEdge]:
         return [MemoryEdge.from_dict(record) for record in self.edges]
 
+    def effective_view(self, *, session_id: str | None = None) -> list[MemoryNode]:
+        """Canonical reader-side effective view for this loaded container.
+
+        This is the *normative* entry point a container reader MUST use to
+        compute "what's currently active" (docs/CCLG_CONTAINER.md's load
+        semantics section, under §3.1 Ledger-only): it wires this bundle's
+        ``@patches`` section through to ``patches.effective_view()`` so a
+        retiring patch (supersede/refine/expand/narrow/merge/split/
+        resolve_conflict/update/expire/forget/deprecate — see
+        ``patches.RETIRING_PATCH_OPERATIONS``) excludes its target node(s) from
+        the active set even if the node's own ``status`` field was never baked
+        to the retired value. Baked status is an optimization a producer MAY
+        apply; a conforming reader MUST NOT rely on it for correctness, since
+        that would silently resurrect a node the ledger's own patch history
+        says is retired.
+
+        Calling ``patches.effective_view(bundle.memory_nodes())`` directly and
+        skipping this method reintroduces exactly that bug — it degrades back
+        to status-only filtering. Prefer this method whenever you need the
+        active set for a loaded ``.cclg`` container.
+        """
+        from .patches import effective_view
+
+        return effective_view(self.memory_nodes(), session_id=session_id, patches=self.memory_patches())
+
 
 def _as_dict(record: Any) -> dict[str, Any]:
     if isinstance(record, dict):
@@ -221,6 +246,80 @@ def pack_from_store(store: CCLGStore, *, session_ids: Iterable[str] | None = Non
     session_paths = sorted(store.sessions_dir.glob("*.json")) if store.sessions_dir.exists() else []
     wanted = set(session_ids) if session_ids is not None else None
     sessions = [load_session(store, path.stem) for path in session_paths if wanted is None or path.stem in wanted]
+
+    return pack_container(nodes, patches, edges, sessions, validate=validate)
+
+
+def pack_for_export(
+    store: CCLGStore,
+    *,
+    session_ids: Iterable[str] | None = None,
+    node_ids: Iterable[str] | None = None,
+    validate: bool = True,
+) -> str:
+    """Pack a filtered slice of a `CCLGStore` ledger — the backing function for
+    `cclg export schift`.
+
+    Unlike `pack_from_store` (whole-ledger export backing `cclg pack-file`,
+    which only ever narrows `@sessions`), this narrows every section to the
+    requested `session_ids` and/or `node_ids`:
+
+    - Neither given: identical to `pack_from_store` (full ledger, no filter).
+    - `session_ids`: selects nodes belonging to those sessions, via each
+      session's own `session_overlay_ids`/`loaded_memory_ids` record (the
+      session's own account of "these are mine" — still correct after a node
+      is promoted/merged and its `scope.session` cleared) unioned with any
+      node whose *current* `scope.session` is one of the ids (covers overlay
+      writes a stale session record hasn't caught up to). Only those
+      sessions' own `@sessions` records are packed.
+    - `node_ids`: selects exactly those node ids.
+    - Both given: the node selection is the union of both.
+    - Patches/edges are included when at least one of their referenced node
+      ids (patch `target_ids`/`new_node_ids`; edge `from`/`to`) is selected.
+
+    Reuses `pack_container` for the actual serialization, so the same
+    auth-free guard and schema validation apply here — there is no separate
+    packing path for the export command to bypass.
+    """
+    from .session import load_session
+
+    store.init()
+    all_nodes = list(store.iter_nodes())
+    all_patches = list(store.iter_patches())
+    all_edges = list(store.iter_edges())
+
+    requested_session_ids = set(session_ids) if session_ids is not None else None
+    requested_node_ids = set(node_ids) if node_ids is not None else None
+    filtering = requested_session_ids is not None or requested_node_ids is not None
+
+    if not filtering:
+        session_paths = sorted(store.sessions_dir.glob("*.json")) if store.sessions_dir.exists() else []
+        return pack_container(
+            [node.to_dict() for node in all_nodes],
+            [patch.to_dict() for patch in all_patches],
+            [edge.to_dict() for edge in all_edges],
+            [load_session(store, path.stem) for path in session_paths],
+            validate=validate,
+        )
+
+    selected_node_ids: set[str] = set(requested_node_ids or ())
+    existing_session_ids = {path.stem for path in (sorted(store.sessions_dir.glob("*.json")) if store.sessions_dir.exists() else [])}
+    matched_session_ids = requested_session_ids & existing_session_ids if requested_session_ids is not None else set()
+    for session_id in matched_session_ids:
+        session = load_session(store, session_id)
+        selected_node_ids.update(session.get("session_overlay_ids", []))
+        selected_node_ids.update(session.get("loaded_memory_ids", []))
+    if requested_session_ids is not None:
+        selected_node_ids.update(node.id for node in all_nodes if node.scope.get("session") in requested_session_ids)
+
+    nodes = [node.to_dict() for node in all_nodes if node.id in selected_node_ids]
+    patches = [
+        patch.to_dict()
+        for patch in all_patches
+        if selected_node_ids.intersection(patch.target_ids) or selected_node_ids.intersection(patch.new_node_ids)
+    ]
+    edges = [edge.to_dict() for edge in all_edges if edge.from_id in selected_node_ids or edge.to_id in selected_node_ids]
+    sessions = [load_session(store, session_id) for session_id in sorted(matched_session_ids)]
 
     return pack_container(nodes, patches, edges, sessions, validate=validate)
 

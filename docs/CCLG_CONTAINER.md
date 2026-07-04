@@ -125,6 +125,47 @@ pass over raw tensors. A `.cclg` file with an `@active_memory_pack` or
 legal, §7), but no conforming producer emits one, and no conforming consumer
 should treat one as authoritative if it appears.
 
+#### 3.1.1 Load semantics: status filtering alone is not sufficient
+
+A container's `@nodes` section can be schema-valid while still being
+*inconsistent* with its own `@patches` section: a node's `status` field can
+still read `active` even though a `@patches` record targets that node with an
+operation that retires it (e.g. a producer appends a
+`MemoryPatch(operation="supersede", target_ids=[...])` record without also
+flipping the target node's `status` to `superseded`). Nothing in §2/§8 forbids
+this — record-level schema validation checks each record in isolation, not
+cross-record consistency between `@nodes` and `@patches`.
+
+**A conforming reader MUST exclude nodes targeted by a retiring patch from the
+effective view, regardless of the node's baked `status`.** Baked status is an
+optimization a producer MAY apply (a live `CCLGStore` always does — see below)
+— it is not required for correctness, and a reader MUST NOT treat "the node's
+own `status` says `active`" as sufficient proof that the node is actually
+active. Concretely: the effective view over a loaded container is the
+**union** of (a) the `status`-based filter (`patches.effective_view`'s
+existing `active`/`active_session` keep-rule) and (b) exclusion of every node
+id appearing in `target_ids` of a patch whose `operation` is one of:
+
+```text
+update, supersede, refine, expand, narrow, merge, split,
+resolve_conflict, expire, forget, deprecate
+```
+
+(this is `patches.RETIRING_PATCH_OPERATIONS` in the Python implementation, and
+the TS mirror's `EXCLUDING_PATCH_OPERATIONS` in
+`cclg-effective-view.ts` — the two lists MUST stay identical). `create` and
+`rollback` are deliberately excluded from this list: neither retires a target.
+
+This is why a bare `patches.effective_view(nodes)` call (status filter only)
+is correct for a **live** `CCLGStore` — `apply_patch` always bakes a patch's
+effect into `node.status` *before* the node is ever read back out, so status
+alone is authoritative there — but is not sufficient as the canonical
+container-load path, where that baking is not guaranteed to have happened
+before the container was produced. `container.ContainerBundle.effective_view()`
+is the canonical reader-side entry point that applies both (a) and (b); a
+reader implementing this format directly (not through that helper) MUST
+still perform the union above.
+
 ### 3.2 Auth-free
 
 The container MUST NOT contain Schift platform-auth fields, in the header or
@@ -279,8 +320,23 @@ src/cclg/container.py
   pack_container(nodes, patches=(), edges=(), sessions=(), *, validate=True) -> str
   load_container(text, *, validate=True) -> ContainerBundle
   pack_from_store(store, *, session_ids=None, validate=True) -> str
+  ContainerBundle.effective_view(*, session_id=None) -> list[MemoryNode]
   ContainerError(ValueError)
+
+src/cclg/patches.py
+  effective_view(nodes, *, session_id=None, patches=None) -> list[MemoryNode]
+  RETIRING_PATCH_OPERATIONS: set[str]
 ```
+
+`ContainerBundle.effective_view()` is the canonical way to get "what's active"
+for a *loaded* container (§3.1.1): it passes the bundle's own `@patches`
+records through to `patches.effective_view()`'s `patches=` argument so a
+retiring patch excludes its target even when the node's `status` was never
+baked to the retired value. `patches.effective_view(nodes)` — called with no
+`patches=` — keeps its original store-only semantics (status filter only) and
+is unaffected; every pre-existing caller (`active_nodes()` in this module,
+agent-hub's `cclg_grounding.py`/`pack.py`) keeps this original behavior
+unchanged because `patches` defaults to `None`.
 
 ```text
 cclg pack-file <out.cclg> [--session ID ...] [--store PATH]
@@ -297,6 +353,13 @@ never writes to a store.
   session records losslessly, and `effective_view()` computed over the loaded
   nodes is identical to `effective_view()` computed over the original store's
   nodes.
+- A container whose `@nodes` section has NOT baked a retiring patch's effect
+  into target `status` (still `active`) still yields the correct, patch-aware
+  effective view when read via `ContainerBundle.effective_view()` (§3.1.1) —
+  the target is excluded regardless of its unbaked `status`.
+- `patches.effective_view(nodes)` called without `patches=` (i.e. every
+  pre-existing call site) is byte-for-byte unchanged: same signature default,
+  same output, for any input that previously worked.
 - `load_container` rejects bad magic, unsupported container version, header/body
   count mismatch (including a header `counts`/`sections` entry missing for a
   section present in the body, §5), and checksum mismatch — each as a distinct

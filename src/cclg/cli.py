@@ -75,6 +75,14 @@ def build_parser() -> argparse.ArgumentParser:
     pack_file.add_argument("--session", action="append", default=[], dest="sessions", help="Limit @sessions to this session id. Repeatable. Omit to include all sessions.")
     pack_file.add_argument("--store", help="Store root to pack from (defaults to --root / $CCLG_HOME)")
 
+    export = sub.add_parser("export", help="Export a portable .cclg payload for a producer target")
+    export_sub = export.add_subparsers(dest="export_target", required=True)
+    export_schift = export_sub.add_parser("schift", help="Export a .cclg payload for Schift ingestion (no Schift auth fields)")
+    export_schift.add_argument("--out", required=True, help="Output .cclg path")
+    export_schift.add_argument("--session", action="append", default=[], dest="sessions", help="Limit to this session's nodes (by id). Repeatable. Omit to not filter by session.")
+    export_schift.add_argument("--node", action="append", default=[], dest="nodes", help="Limit to this node id. Repeatable. Omit to not filter by node.")
+    export_schift.add_argument("--store", help="Store root to export from (defaults to --root / $CCLG_HOME)")
+
     open_cmd = sub.add_parser("open", help="Open and validate a .cclg container (read-only: validate + print header/counts)")
     open_cmd.add_argument("path", help="Path to a .cclg container file")
     open_cmd.add_argument("--json", action="store_true")
@@ -299,6 +307,18 @@ def _main(argv: list[str] | None = None) -> int:
         out_path.write_text(text, encoding="utf-8")
         print(f"wrote {out_path}")
         return 0
+
+    if args.command == "export":
+        if args.export_target == "schift":
+            from .container import pack_for_export
+
+            export_store = CCLGStore(args.store) if args.store else store
+            text = pack_for_export(export_store, session_ids=args.sessions or None, node_ids=args.nodes or None)
+            out_path = Path(args.out).expanduser()
+            out_path.write_text(text, encoding="utf-8")
+            print(f"wrote {out_path}")
+            return 0
+        raise AssertionError(args.export_target)
 
     if args.command == "open":
         from .container import load_container

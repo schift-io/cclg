@@ -32,6 +32,21 @@ SUPERSEDING_OPERATIONS = {
     "resolve_conflict",
 }
 
+# Patch operations whose application retires the *old* target node(s) from the
+# effective view, independent of whatever `apply_patch` did or didn't bake into
+# `node.status`. Superset of SUPERSEDING_OPERATIONS: also covers the
+# expire/forget/deprecate branch of `apply_patch`, which mutates target status
+# directly rather than emitting a "supersedes" relation. This is the exact same
+# set as the TS mirror's `EXCLUDING_PATCH_OPERATIONS`
+# (derivatives/schift-ai-memory/packages/core/src/cclg-effective-view.ts) —
+# keep the two lists identical; a divergence here reintroduces the cross-impl
+# effective-view mismatch documented in docs/CCLG_CONTAINER.md's load
+# semantics section. "create" and "rollback" are deliberately excluded: neither
+# retires a target ("rollback" falls through to the generic branch in
+# `apply_patch` but was never added to SUPERSEDING_OPERATIONS, so its target's
+# status is left `active`).
+RETIRING_PATCH_OPERATIONS = SUPERSEDING_OPERATIONS | {"expire", "forget", "deprecate"}
+
 
 def apply_patch(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
     """Apply a memory patch and return nodes written by the operation."""
@@ -122,16 +137,53 @@ def _resolve_scope_precedence(nodes: list[MemoryNode], session_id: str | None) -
     return keyless + list(winners.values())
 
 
-def effective_view(nodes: list[MemoryNode], *, session_id: str | None = None) -> list[MemoryNode]:
+def effective_view(
+    nodes: list[MemoryNode],
+    *,
+    session_id: str | None = None,
+    patches: list[MemoryPatch] | None = None,
+) -> list[MemoryNode]:
     """Pure effective-view over a node list (no store).
 
     Keeps active nodes (+ this session's active_session overlay), drops
     superseded/expired/forgotten/etc., then applies scope precedence. This is the
     store-less core so CCLG can run as a library over memories owned by an external
     store (e.g. the Schift memory backend).
+
+    ``patches`` is optional and defaults to ``None``, which preserves this
+    function's original behavior byte-for-byte (every existing caller —
+    ``active_nodes()`` below, agent-hub's ``cclg_grounding.py``/``pack.py``, ...
+    — keeps working unchanged because a live ``CCLGStore`` always bakes a
+    patch's effect into ``node.status`` via ``apply_patch`` *before* a node is
+    ever read back out, so ``node.status`` alone is authoritative there).
+
+    When ``patches`` *is* given, this additionally and independently excludes
+    any node referenced as a `target_ids` entry of a patch whose operation is
+    in ``RETIRING_PATCH_OPERATIONS``, regardless of what that node's own
+    `status` field says. This closes the gap a loaded `.cclg` container can hit
+    that a live store never can: a container is schema-valid but was produced
+    without replaying `apply_patch`'s status mutation (e.g. a producer records
+    a `MemoryPatch(operation="supersede")` without also flipping the target
+    node's `status` to `superseded`) — status-only filtering would then
+    wrongly keep a superseded/forgotten node in the effective view. Per
+    docs/CCLG_CONTAINER.md's load semantics section, baked status is an
+    optimization a producer MAY apply; a conforming reader MUST NOT depend on
+    it for correctness. Mirrors the TS port's
+    `effectiveView(nodes, patches, sessionId)`
+    (derivatives/schift-ai-memory/packages/core/src/cclg-effective-view.ts) —
+    ``ContainerBundle.effective_view()`` in `container.py` is the canonical
+    caller that wires a loaded container's patches through here.
     """
+    excluded_ids: set[str] = set()
+    if patches:
+        for patch in patches:
+            if patch.operation in RETIRING_PATCH_OPERATIONS:
+                excluded_ids.update(patch.target_ids)
+
     candidates: list[MemoryNode] = []
     for node in nodes:
+        if node.id in excluded_ids:
+            continue
         if node.status == "active":
             candidates.append(node)
         elif session_id and node.status == "active_session" and (node.scope or {}).get("session") == session_id:

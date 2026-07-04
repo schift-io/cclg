@@ -181,6 +181,72 @@ cclg apply-codex --write-skill
 Hook and MCP examples are copied to `~/.codex` and `~/.claude` as example files.
 They are not live until you merge them into your host settings.
 
+## Use CCLG From Your Stack
+
+One format, three consumption modes — the same `.cclg` ledger travels between
+all of them:
+
+```text
+                       .cclg  (one portable memory format)
+                          |
+        +-----------------+----------------------+
+        |                 |                      |
+        v                 v                      v
++------------------+  +--------------------+  +----------------------+
+| coding agents    |  | agent runtimes     |  | hosted memory        |
+|                  |  |                    |  |                      |
+| Claude Code      |  | Schift APM         |  | Schift AI Memory     |
+| Codex            |  | (agent packs)      |  | (TS loader)          |
+| Hermes           |  |                    |  |                      |
+|                  |  |                    |  |                      |
+| hooks + MCP      |  | store-less library |  | lossless container   |
+| ~/.cclg store    |  | over tenant memory |  | load + effective-    |
+| ActiveMemoryPack |  | + .cclg export     |  | view projection      |
++------------------+  +--------------------+  +----------------------+
+```
+
+### With coding agents (Claude Code / Codex / Hermes)
+
+The installer wires lifecycle hooks and the MCP server into the host. Every
+session accumulates source-grounded nodes in `~/.cclg`; corrections become
+patches; the hook injects only the active effective view as an
+ActiveMemoryPack. Hermes and other agent-workbench hosts integrate the same
+way: hook on user prompt, MCP tools for explicit memory/patch/search calls.
+
+### With APM (Schift agent runtime)
+
+Schift's APM runtime consumes CCLG as a store-less library over its own
+tenant-scoped memory store — no second store, no sync:
+
+```text
+tenant memory store (single source of truth)
+        | memories
+        v
+CCLG effective view   -> corrected/forgotten facts never reach sub-agents
+CCLG patch detection  -> user corrections become supersession patches
+ActiveMemoryPack      -> session context, order-stable + token-budgeted
+.cclg export          -> any session leaves as one portable container file
+```
+
+The pack is what the agent actually reads: stable ordering keeps provider
+prompt caches warm, and the budget keeps token spend bounded. The export means
+an agent's memory is never locked in — it is a file.
+
+### With hosted memory (Schift AI Memory)
+
+The hosted wrapper loads `.cclg` containers losslessly: the container bytes are
+preserved verbatim (patches and edges stay first-class records), and the
+searchable flat view is derived as a projection of the on-load effective view —
+never a second source of truth.
+
+### Bring your own runtime
+
+The core stays host-agnostic. Runtime-specific install paths and host adapters
+(a new agent host's hook config, an APM-style runtime binding) land as pull
+requests: adapters live under `adapters/<host>/`, integration docs under
+`docs/`. If your runtime can read JSON and verify a sha256, it can speak
+`.cclg`.
+
 ## CCLG As The Schift AI Memory Format
 
 Yes: the target architecture is that Schift AI Memory uses CCLG as its memory
@@ -256,8 +322,10 @@ Concrete adapter plan: [docs/SCHIFT_AI_MEMORY_FORMAT.md](docs/SCHIFT_AI_MEMORY_F
 
 ## Current Runtime Compatibility
 
-Before that adapter exists, the current packages are compatible as side-by-side
-host integrations. They are not yet one shared memory database.
+The loader half of that adapter has landed: Schift AI Memory reads `.cclg`
+containers losslessly and carries CCLG-shaped records instead of a competing
+format. Operationally the two packages still run as side-by-side host
+integrations with separate stores.
 
 ```text
                  same Codex / Claude host
@@ -279,29 +347,28 @@ host integrations. They are not yet one shared memory database.
    current task context             company memory surface
 ```
 
-No automatic data bridge exists in the current packages:
+What works today (verified end-to-end against real producer bytes):
 
 ```text
-CCLG memory node       -X->  Schift AI Memory record
-Schift work-log event  -X->  CCLG memory node
-CCLG patch/suppression -X->  Schift permission state
-Schift bucket policy   -X->  CCLG local ledger state
+runtime session export  --->  .cclg  (corrections preserved as patches)
+.cclg container         --->  Schift AI Memory envelope
+                              (verbatim container payload, zero record loss;
+                               patches/edges stay first-class records)
+on-load effective view  --->  searchable flat projection
+                              (superseded/forgotten facts excluded)
 ```
 
-A near-term bridge should make the target dependency real:
+Still pending on the hosted side:
 
 ```text
-CCLG session summary    --->  Schift AI Memory upload
-CCLG memory pack        --->  Schift AI Memory record payload
-Schift search result    --->  CCLG raw evidence import
-selected Schift context --->  CCLG source-grounded node
+live upload/search smoke against a real Schift bucket
+Schift search result    -X->  CCLG raw evidence import
+Schift bucket policy    -X->  CCLG local ledger state
 ```
 
-Until that bridge exists, use CCLG for local task context and Schift AI Memory
-for Schift-owned work-log upload/retrieval. When the bridge lands, Schift AI
-Memory should carry CCLG-shaped records instead of its own competing memory
-format. When both are installed today, merge hook and MCP config explicitly
-instead of overwriting either tool's generated examples.
+Use CCLG for local task context and Schift AI Memory for Schift-owned work-log
+upload/retrieval. When both are installed today, merge hook and MCP config
+explicitly instead of overwriting either tool's generated examples.
 
 ## Update Or Uninstall
 
