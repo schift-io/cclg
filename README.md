@@ -215,9 +215,10 @@ way: hook on user prompt, MCP tools for explicit memory/patch/search calls.
 
 ### With an APM agent runtime (example: Schift)
 
-Runtimes that execute APM agent packages can bind CCLG as their memory layer.
-Schift's runtime does exactly this — it consumes CCLG as a store-less library
-over its own tenant-scoped memory store, no second store, no sync:
+Runtimes that execute APM (Microsoft's agent package standard) packages can
+bind CCLG as their memory layer. Schift's runtime does exactly this — it
+consumes CCLG as a store-less library over its own tenant-scoped memory store,
+no second store, no sync:
 
 ```text
 tenant memory store (single source of truth)

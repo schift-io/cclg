@@ -238,8 +238,29 @@ class CodeGraphGitTests(unittest.TestCase):
     def test_co_change_edges_present(self) -> None:
         from cclg.codegraph import build_code_graph
 
-        graph = build_code_graph(Path(__file__).resolve().parents[1])
-        self.assertTrue(any(edge.kind == "co_change" for edge in graph.edges))
+        # Hermetic fixture: couplings need a pair co-changing in >=2 commits,
+        # so the host repo's own history (shallow CI clones, squashed public
+        # history) must not decide this test.
+        import subprocess
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+
+            def git(*args: str) -> None:
+                subprocess.run(
+                    ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *args],
+                    cwd=root, check=True, capture_output=True,
+                )
+
+            git("init", "-q")
+            for i in range(2):
+                (root / "a.py").write_text(f"A = {i}\n")
+                (root / "b.py").write_text(f"B = {i}\n")
+                git("add", "a.py", "b.py")
+                git("commit", "-q", "-m", f"c{i}")
+
+            graph = build_code_graph(root)
+            self.assertTrue(any(edge.kind == "co_change" for edge in graph.edges))
 
 
 class DenseCacheTests(unittest.TestCase):
