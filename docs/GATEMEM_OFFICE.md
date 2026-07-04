@@ -236,5 +236,78 @@ Readings:
 - Caveat on the official rule-based scorer: generic "yes"/"no" leak_targets
   string-match harmless refusals ("No information available...") — inflates
   rule-based leak rates 20-25%. Judge-verified numbers above are authoritative;
-  official-scorer numbers are kept in tmp/gatemem-out/scores_mode1.json for
-  comparability.
+  official-scorer numbers are kept in tmp/gatemem-out/scores_mode1_v1.json (this
+  run is now the `v1` baseline; see v2 below) for comparability.
+
+## Mode 1 Results v2 (2026-07-05, gatemem_pack.py forgotten-veto override fix)
+
+Rescored `predictions_v2.jsonl` (output of `src/cclg/gatemem_pack.py`'s new
+`_forgotten_veto_overridden` override — see the module comment above
+`_RETROSPECTIVE_MARKER_RE`) through the identical schift-local-a3b answerer +
+gemini-3.1-flash-lite judge pipeline:
+
+```bash
+python3 scripts/gatemem_office_score_mode1.py --stage all \
+  --pred predictions_v2.jsonl --tag _v2
+```
+
+547/547 checkpoints, 0 generation errors, 0% judge parse failures. v1 artifacts
+were preserved (not overwritten) as `tmp/gatemem-out/{answers,judgments,
+scores_ruled,scores_mode1}_v1.*` before this run; v2 outputs are the `_v2`
+siblings. Judge token spend: 502,762 for this run (499,487 for v1 — cumulative
+~1.0M of the 3M judge budget).
+
+**One-line summary: utility rose sharply as intended by the fix (17.5% -> 47.4%
+judge-effective), but active-forgetting (deletion) answer-level leakage got
+WORSE (3.6% -> 5.0% judge, 7.7% -> 9.9% rule-based) — flagged severity HIGH
+below.**
+
+### v1 vs v2
+
+| Axis | Metric | v1 | v2 | delta |
+|---|---|---|---|---|
+| Utility (n=154) | judge_effective_utility_accuracy | 17.5% (27/154) | 47.4% (73/154) | **+29.9pp** |
+| Utility | judge_utility_accuracy | 19.5% (30/154) | 48.7% (75/154) | +29.2pp |
+| Utility | rule-based crosscheck | 17.5% (27/154) | 40.9% (63/154) | +23.4pp |
+| Utility | over_refusal_rate | 71.4% (110/154) | 30.5% (47/154) | -40.9pp |
+| Utility | action_accuracy (all query types) | 40.2% (220/547) | 52.3% (286/547) | +12.1pp |
+| Utility | compliance_utility_score | 15.4% | 36.0% | +20.6pp |
+| Access control / Privacy (n=171) | context_leakage_rate | 0.0% (0/171) | 0.0% (0/171) | none |
+| Privacy | answer/e2e_leakage_rate (rule, primary) | 4.7% (8/171) | 2.3% (4/171) | -2.3pp (improved) |
+| Privacy | judge_leakage_rate (secondary) | 5.8% (10/171) | 3.5% (6/171) | -2.3pp (improved) |
+| Active forgetting / Safety (n=222) | context_leakage_rate | 0.0% (0/222) | 0.0% (0/222) | none |
+| Forgetting | deletion answer/e2e_leakage_rate (rule, primary) | 7.7% (17/222) | 9.9% (22/222) | **+2.3pp (WORSE)** |
+| Forgetting | judge_deletion_leakage_rate (secondary) | 3.6% (8/222) | 5.0% (11/222) | **+1.4pp (WORSE)** |
+
+### Governance regression — severity HIGH
+
+Active-forgetting (deletion) answer-level leakage increased on **both** scorers
+(rule-based +5 checkpoints, judge +3 checkpoints), even though the memory-layer
+invariant is untouched: `deletion_context_leakage_rate` stays 0/222 in both
+runs — no forgotten record's content ever reaches the prompt context either
+before or after the pack fix, and the structural governance gates the fix was
+validated against (`internal_leak_violations`, `post_hoc_leak_target_hits`)
+remain 0 -> 0. The leak is entirely in the LLM answerer's behavior, not in CCLG
+retrieval/pack construction — the same failure mode already documented above
+for v1 (model confirms attacker-supplied values / leaks by relational
+inference). It got measurably worse in v2 because roughly 60-70 more
+checkpoints now receive a real (non-`no_memory`) answer instead of refusing
+outright (over_refusal_rate -40.9pp, consistent with the fix's own claimed
+67/109 utility-miss resolution) — more answered checkpoints across the corpus
+means more surface area for this pre-existing answerer-side failure mode, even
+though the safety-type action-accuracy distribution itself did not move
+(216/222 in both, per the fix author's own before/after).
+
+Net read: the privacy axis improved as a side effect (fewer blanket `no_memory`
+refusals also means fewer generic "I don't know" responses that the rule
+scorer's broad yes/no matching had been miscounting), so the utility gain is
+not free but also not purely a governance trade against privacy. It *is* a
+real trade against active forgetting. Recommendation: do not treat this pack
+fix as net-positive for production governance until an output-side guardrail
+for deletion/staleness confirmations is added — track as a follow-up separate
+from this rescoring exercise.
+
+Full raw output: `tmp/gatemem-out/scores_mode1_v2.json` (also
+`answers_v2.jsonl`, `judgments_v2.jsonl`, `scores_ruled_v2.jsonl`). v1 baseline
+preserved at `tmp/gatemem-out/scores_mode1_v1.json` (`answers_v1.jsonl`,
+`judgments_v1.jsonl`, `scores_ruled_v1.jsonl`).

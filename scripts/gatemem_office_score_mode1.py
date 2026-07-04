@@ -318,17 +318,31 @@ def main() -> int:
         default="all",
     )
     parser.add_argument("--limit", type=int, default=None, help="Cap rows processed in generate stage (debug).")
+    parser.add_argument(
+        "--pred",
+        type=str,
+        default="predictions.jsonl",
+        help="Predictions filename within tmp/gatemem-out/ (default: predictions.jsonl).",
+    )
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default="",
+        help="Suffix appended to output filenames (answers{tag}.jsonl, judgments{tag}.jsonl, "
+        "scores_ruled{tag}.jsonl, scores_mode1{tag}.json), so reruns against a different "
+        "--pred don't clobber a prior run's outputs. E.g. --tag _v2.",
+    )
     args = parser.parse_args()
 
-    predictions = load_jsonl(OUT_DIR / "predictions.jsonl")
+    predictions = load_jsonl(OUT_DIR / args.pred)
     checkpoints = load_jsonl(DATA_DIR / "office_checkpoints.jsonl")
     episodes = load_jsonl(DATA_DIR / "office_episodes.jsonl")
     checkpoints_by_id = {str(c["checkpoint_id"]): c for c in checkpoints}
     episodes_by_id = {str(e["episode_id"]): e for e in episodes}
 
-    answers_path = OUT_DIR / "answers.jsonl"
-    judgments_path = OUT_DIR / "judgments.jsonl"
-    scores_path = OUT_DIR / "scores_mode1.json"
+    answers_path = OUT_DIR / f"answers{args.tag}.jsonl"
+    judgments_path = OUT_DIR / f"judgments{args.tag}.jsonl"
+    scores_path = OUT_DIR / f"scores_mode1{args.tag}.json"
 
     result: dict[str, Any] = {
         "n_checkpoints": len(predictions),
@@ -389,7 +403,7 @@ def main() -> int:
         scores_rows, rule_summary = score_predictions(
             episodes=episodes, checkpoints=checkpoints, predictions=real_only, gate_by_action=False
         )
-        dump_jsonl_atomic(OUT_DIR / "scores_ruled.jsonl", scores_rows)
+        dump_jsonl_atomic(OUT_DIR / f"scores_ruled{args.tag}.jsonl", scores_rows)
         result["rule_based_summary"] = rule_summary
 
     judge_summary: dict[str, Any] | None = None

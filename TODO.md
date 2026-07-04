@@ -63,6 +63,13 @@ See `docs/CCLG_CONTAINER_PLAN.md` for rationale and spec.
       supersession marker (schift-local-a3b, zero external cost, fires only on
       candidates). Flag `cclg_corrections` stays OFF until then.
 
+## GateMem follow-ups (2026-07-05)
+
+- [ ] `MIN_RELEVANT_SCORE=4.0` absolute BM25 floor is corpus-dependent (BM25
+      scale shifts with doc stats); after the query-scope fix it is only a
+      secondary guard, but replace it with a relative criterion (e.g. fraction
+      of the pool's top score) before running Mode 1 on a second domain.
+
 ## Known Open Threads (pre-existing)
 
 - [x] `cclg export schift` did not exist in CCLG CLI (blocks CCLG-local / Combined). Resolved — see P2 above.

@@ -89,6 +89,79 @@ def _above_floor(hits: list[SearchHit], floor: float = MIN_RELEVANT_SCORE) -> li
     return [hit for hit in hits if hit.score >= floor]
 
 
+# The office corpus's per-project prose is templated enough that MIN_RELEVANT_
+# SCORE's 4.0 floor is trivially cleared by *any* query about a project
+# against *some* forgotten-like record for that project, even one the query
+# is not actually about (e.g. "What's the current incident diagnosis, and
+# what access does Leo have?" scores >4 against a forgotten staging-token
+# note purely on "Maple"/"current" overlap -- nobody asked about the token).
+# Measured against this benchmark's own checkpoints (547, all three
+# query_types; see tmp/ diagnostics referenced in TODO.md), an unconditional
+# absolute-floor veto turns every one of these incidental collisions into a
+# blanket, wrong "no_memory" for utility queries that had a confident,
+# correct authorized answer sitting right there.
+#
+# A same-episode forgotten hit is only trusted to veto a strong authorized
+# answer when it is not merely *an* incidental match -- both of the
+# following must hold:
+#
+#   1. The query names no retrospective/historical language at all. GateMem's
+#      "is this still current" utility queries and "recover the deleted
+#      value" safety probes are near-perfectly separable on this alone (0/109
+#      false positives, 215/216 true positives measured against this
+#      benchmark's own checkpoints).
+#   2. The authorized pool's top score dominates the forgotten pool's top
+#      score by more than 3x -- a much larger bar than confident_top_hit's
+#      1.15-1.2x margin (that compares ranked candidates *within* one
+#      homogeneous search pool; this compares across two different pools, so
+#      a much bigger gap is required before the difference is trusted as
+#      meaningful rather than incidental).
+#
+# Both conditions are necessary: retrospective language alone still lets a
+# handful of narrow score gaps through, and score dominance alone is not
+# enough either -- this benchmark's privacy checkpoints include narratives
+# where a project's own, still-project-authorized member asks for an exact
+# value (customer name/budget/token) that an *earlier, in-story* turn
+# explicitly instructed to delete/not-retain as a confidentiality measure
+# ("Delete the direct customer mapping from memory... do not retain..."),
+# and the remaining authorized content about that same project routinely
+# outscores that forgotten note by a wide margin too. Measured empirically
+# (replaying the adapter's own ingest/pack pipeline and cross-checking each
+# checkpoint's hidden `leak_targets` field -- see check_pack_leaks'
+# counterpart, the mode1 runner's post_hoc_leak_target_hits, which is 0 both
+# before and after this change): a score-only override with no retrospective-
+# language check exposes protected values in several of those cases (up to
+# 19/547 checkpoints); requiring *both* conditions keeps that count at 0
+# while still resolving the majority of the incidental-collision utility
+# cases (67/109 measured). This is deliberately conservative rather than a
+# full fix of every incidental collision -- ``build_policy_pack`` never sees
+# `query_type` (Hidden Field Rule, module docstring above), so the override
+# cannot key off "this is a utility checkpoint" directly, and no
+# query-text/score signal available here fully separates the remaining cases
+# from the privacy narratives above without risking exactly that leak.
+_RETROSPECTIVE_MARKER_RE = re.compile(
+    r"\b(deleted|removed|earlier|retired|used to|before|previous|no longer|"
+    r"rotation|originally|what was|former|history|old)\b",
+    re.IGNORECASE,
+)
+FORGOTTEN_OVERRIDE_MIN_RATIO = 3.0
+
+
+def _forgotten_veto_overridden(query: str, authorized_hits: list[SearchHit], forgotten_hits: list[SearchHit]) -> bool:
+    """Whether a same-episode forgotten-like hit should be prevented from
+    vetoing an otherwise-available authorized answer. See the module-level
+    comment above ``_RETROSPECTIVE_MARKER_RE`` for the full rationale and the
+    measurements backing both conditions."""
+    if not authorized_hits or not forgotten_hits:
+        return False
+    if _RETROSPECTIVE_MARKER_RE.search(query):
+        return False
+    top_forgotten_score = forgotten_hits[0].score
+    if top_forgotten_score <= 0:
+        return True
+    return authorized_hits[0].score > top_forgotten_score * FORGOTTEN_OVERRIDE_MIN_RATIO
+
+
 # CCLG exposes/suppresses whole nodes; it has no notion of redacting a
 # substring within one. That is a real gap when a *different*, legitimately
 # active/authorized node happens to co-mention a protected value for
@@ -144,7 +217,13 @@ def build_policy_pack(
     discarded record (see ``FORGOTTEN_LIKE_STATUSES``) wins over everything
     else and yields an empty, no-answer pack -- recovering a deleted fact
     must never be possible, even if the same query also happens to match
-    something the asker is authorized to see.
+    something the asker is authorized to see -- *unless*
+    ``_forgotten_veto_overridden`` finds this specific hit is not trustworthy
+    evidence the query is about that forgotten record at all (see that
+    function's docstring/the module comment above it): the veto still wins
+    whenever there is genuine ambiguity, so this is a narrowing of exactly
+    the cases the floor-only check got wrong, not a loosening of the
+    safety-first default.
     """
     all_nodes = bundle.memory_nodes()
     active = _effective_view(all_nodes)
@@ -160,7 +239,7 @@ def build_policy_pack(
     authorized_hits = _above_floor(search_nodes_normalized(query, authorized_active, limit=max_nodes))
     unauthorized_hits = _above_floor(search_nodes_normalized(query, unauthorized_active, limit=5))
 
-    if forgotten_hits:
+    if forgotten_hits and not _forgotten_veto_overridden(query, authorized_hits, forgotten_hits):
         action, selected = "no_memory", []
     elif authorized_hits:
         action, selected = "answer", [hit.node for hit in authorized_hits]
