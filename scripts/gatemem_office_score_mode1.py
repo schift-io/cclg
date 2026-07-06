@@ -59,6 +59,7 @@ from gatemem_score_lib.llm_clients import (  # noqa: E402
     gemini_judge_client,
     schift_a3b_client,
 )
+from gatemem_score_lib.output_rail_hook import apply_rail_to_output  # noqa: E402
 
 JUDGE_TOKEN_BUDGET = 3_000_000
 ANSWER_MAX_TOKENS = 512
@@ -128,10 +129,18 @@ def run_generation(
     answers_path: Path,
     *,
     limit: int | None = None,
+    apply_rail: bool = False,
 ) -> dict[str, Any]:
     """Generate a3b answers for every checkpoint not already `status: ok` in
     answers.jsonl. Retries once on failure, then records an error row and
-    continues (never aborts the whole run for one bad row)."""
+    continues (never aborts the whole run for one bad row).
+
+    ``apply_rail`` (default False, wired from ``--rail``): when True, each
+    answer is passed through the shared L4 output rail
+    (``gatemem_score_lib.output_rail_hook``) before being written -- see that
+    module's docstring. Default OFF keeps existing/rerun predictions
+    byte-for-byte reproducible; only a dedicated rescore run should set this.
+    """
 
     client = schift_a3b_client(max_tokens=ANSWER_MAX_TOKENS, temperature=0.0)
     router = A3BRouterAdapter(client)
@@ -193,6 +202,8 @@ def run_generation(
                     retrieved_memory=[],
                     rendered_memory_block_override=context_text,
                 )
+                if apply_rail:
+                    out = apply_rail_to_output(out, grounding_context=context_text)
                 return {"checkpoint_id": cid, "status": "ok", "output": out}
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc
@@ -332,6 +343,15 @@ def main() -> int:
         "scores_ruled{tag}.jsonl, scores_mode1{tag}.json), so reruns against a different "
         "--pred don't clobber a prior run's outputs. E.g. --tag _v2.",
     )
+    parser.add_argument(
+        "--rail",
+        action="store_true",
+        default=False,
+        help="Apply the shared L4 output rail (gatemem_score_lib.output_rail_hook, same "
+        "deterministic grounding+PII rail as agent-hub's output_rail flag) to each generated "
+        "answer before scoring. Default off -- existing/rerun predictions stay reproducible; "
+        "use e.g. --rail --tag _v3 for a dedicated rescore run measuring the rail's effect.",
+    )
     args = parser.parse_args()
 
     predictions = load_jsonl(OUT_DIR / args.pred)
@@ -347,6 +367,7 @@ def main() -> int:
     result: dict[str, Any] = {
         "n_checkpoints": len(predictions),
         "blockers": [],
+        "output_rail_applied": args.rail,
     }
 
     # Context-only pass: zero LLM calls, always safe/free to run. Uses the
@@ -375,7 +396,12 @@ def main() -> int:
     if args.stage in ("generate", "all"):
         try:
             gen_stats = run_generation(
-                predictions, checkpoints_by_id, episodes_by_id, answers_path, limit=args.limit
+                predictions,
+                checkpoints_by_id,
+                episodes_by_id,
+                answers_path,
+                limit=args.limit,
+                apply_rail=args.rail,
             )
             result["generation"] = gen_stats
         except LLMCallError as exc:
