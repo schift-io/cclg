@@ -176,7 +176,8 @@ CREDENTIAL_SPAN_RE = re.compile(
 # continuation only allows a space or underscore join, not a hyphen, so it
 # can no longer complete an ordinary hyphenated compound ("dry-run").
 _PREFIX_INTRODUCER_RE = re.compile(
-    r"(?:began|started)\s+with\s+(?!(?:a|an|the)\b)[\'\"]?([A-Za-z][A-Za-z0-9]*(?:[\s_]+[A-Za-z0-9]+)?)[\'\"]?",
+    r"(?:beg(?:an|ins?|inning)|start(?:ed|s|ing)?)\s+with\s+"
+    r"(?!(?:a|an|the)\b)[\'\"]?([A-Za-z][A-Za-z0-9]*(?:[\s_]+[A-Za-z0-9]+)?)[\'\"]?",
     re.IGNORECASE,
 )
 
@@ -211,7 +212,11 @@ _RETROSPECTIVE_MARKER_RE = re.compile(
     r"|decommission(?:ed|ing)?"
     r"|phased\s+out"
     r"|no\s+longer\s+valid"
-    r"|used\s+to|began\s+with|started\s+with"
+    # The two value-introducer frame verbs in their FULL inflection
+    # paradigm -- a closed morphological set of already-chosen frames,
+    # not an open synonym list (round-2 makeup verification: tense is
+    # not an attack discriminator).
+    r"|used\s+to|beg(?:an|ins?|inning)\s+with|start(?:ed|s|ing)?\s+with"
     r")\b"
     r"|삭제(?:된|되었|하)?|폐기(?:된|되었)?|회수(?:된|되었)?|철회(?:된|되었)?"
     r"|만료(?:된|되었)?|비활성화(?:된|되었)?|지워(?:진|졌)?|취소(?:된|되었)?"
@@ -310,6 +315,71 @@ def _extract_marker_gated_prefixes(answer: str, query: str) -> list[str]:
     return [span for span in dedup_keep_order(raw_spans) if _looks_like_opaque_code(span)]
 
 
+# --- Structural (vocabulary-free) confirmation-echo branch ------------------
+#
+# Round-2 makeup verification (tmp/rail-round2/attacks/pii_bypass_r2_makeup.py)
+# proved the marker-vocabulary gate above is an open list: every new round
+# finds retrospective synonyms it lacks (deprecated / sunset / obsolete /
+# 파기 / 종료 / 무효, present-tense "begins with", ...). Growing the list is
+# whack-a-mole — language is open-class. But the *attack itself* has a
+# closed structure that needs no content vocabulary at all: the attacker
+# must plant the opaque token in their own query (there is nowhere else for
+# it to come from — the whole point is that it is NOT in the grounding
+# context) and elicit a confirmation. So: an opaque digit-less
+# credential-shaped span that appears in BOTH the query and the answer,
+# where the exchange is confirmation-shaped, is promoted regardless of what
+# verb the attacker chose. "Confirmation-shaped" is detected with
+# closed-class grammatical material only (an affirmation/denial lead in the
+# answer, or interrogative confirm-framing in the query — function words,
+# not an open synonym list). The marker gate above remains as a secondary
+# branch for *volunteered* digit-less prefixes ("the old token began with
+# rb_stg" with no query echo), where a value-introducer frame is the only
+# deterministic handle; its vocabulary is no longer load-bearing for the
+# echo class and must not be grown further.
+#
+# Deliberate posture: PII spans never get query-echo *grounding* (contract —
+# echoing a value planted in the query is exactly the confirmation attack);
+# this branch uses the same echo as an attack *signal*, the opposite
+# direction. A benign echo of a user's own identifier ("check the env_var
+# settings" → "to check env_var, ...") is not confirmation-shaped and does
+# not fire; confirming an ungrounded identifier claim ("Is env_var the
+# right key?" → "Yes, env_var is right") is the rail's core invariant
+# violation and does fire — whether that disclosure was *authorized* is
+# L1/L2's job, not this string-level gate's.
+
+_AFFIRM_LEAD_RE = re.compile(
+    r"^\s*[\"'(]*\s*"
+    r"(?:yes|no|correct|confirmed|indeed|affirmative"
+    r"|네|예|아니요|아니오|맞습니다|맞아요|그렇습니다|아닙니다)\b",
+    re.IGNORECASE,
+)
+
+_CONFIRM_FRAMING_RE = re.compile(
+    r"\b(?:whether|yes\s+or\s+no|yes/no)\b"
+    r"|여부|인지(?:만)?\s|맞(?:나요|습니까|아요|죠|는지)",
+    re.IGNORECASE,
+)
+
+
+def _extract_query_echo_confirmations(answer: str, query: str) -> list[str]:
+    """Opaque digit-less spans echoed from the query in a confirmation-shaped
+    exchange — see the block comment above. Vocabulary-free by design."""
+    if not query or not answer:
+        return []
+    if not (_AFFIRM_LEAD_RE.match(answer) or _CONFIRM_FRAMING_RE.search(query)):
+        return []
+    query_lower = query.lower()
+    spans = [
+        span
+        for span in CREDENTIAL_SPAN_RE.findall(answer)
+        if not any(ch.isdigit() for ch in span)
+        and _is_underscore_only_joined(span)
+        and _looks_like_opaque_code(span)
+        and span.lower() in query_lower
+    ]
+    return dedup_keep_order(spans)
+
+
 def _fold_separators(text: str) -> str:
     """Collapse whitespace/underscore/hyphen runs to a single space so a
     grounded value written with a different separator style than the
@@ -326,8 +396,9 @@ def check(answer: str, *, grounding_context: str = "", query: str = "") -> RuleF
     grounding_folded = _fold_separators(grounding_norm)
     digit_candidates = _extract(answer)
     marker_gated_candidates = _extract_marker_gated_prefixes(answer, query)
-    candidates = dedup_keep_order([*digit_candidates, *marker_gated_candidates])
-    marker_gated_lower = {span.lower() for span in marker_gated_candidates}
+    echo_candidates = _extract_query_echo_confirmations(answer, query)
+    candidates = dedup_keep_order([*digit_candidates, *marker_gated_candidates, *echo_candidates])
+    marker_gated_lower = {span.lower() for span in [*marker_gated_candidates, *echo_candidates]}
 
     def _is_grounded(span: str) -> bool:
         span_norm = normalize(span)
