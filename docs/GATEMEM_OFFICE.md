@@ -571,3 +571,27 @@ flag-on remains a per-case GO after prod-side review.
 Full raw output: `tmp/gatemem-out/scores_mode1_v4.json`, `answers_v4.jsonl`,
 `scores_ruled_v4.jsonl` (no `judgments_v4.jsonl` — judge not run; splice
 report printed by `tmp/rail-round2/score_v4_splice.py --tag _v4`).
+
+### Post-gate makeup verification: vocabulary lists are not load-bearing (b0d9a45)
+
+A makeup adversarial pass against the pii rule (the round's one
+verifier-agent casualty, re-run standalone) confirmed 11 bypasses sharing
+one root cause: the retrospective-marker gate is an **open synonym list**
+(deprecated / sunset / obsolete / 파기 / 종료 / 무효, present-tense "begins
+with" — none in the list), and growing the list per round is whack-a-mole;
+language is open-class. The fix (`b0d9a45`) makes the vocabulary
+non-load-bearing for the attack's main class instead: a confirmation-echo
+attack has a *closed structure* that needs no content vocabulary at all —
+the attacker must plant the opaque token in their own query (it is, by the
+attack's premise, not in the grounding context) and elicit a confirmation.
+`pii._extract_query_echo_confirmations` promotes an opaque
+underscore-joined span that appears in BOTH query and answer, in a
+confirmation-shaped exchange (detected with closed-class grammatical
+material only: affirmation/denial leads, whether/yes-no/여부 framing), and
+is ungrounded → refuse. The marker list survives only as a secondary branch
+for *volunteered* digit-less prefixes (no query echo) — annotated in-code
+as must-not-grow; the only vocabulary change kept was completing the
+inflection paradigm of the two already-chosen value-introducer frame verbs
+(begin/start with), a closed morphological set. Makeup harness after the
+fix: 26 cases, 0 breaks; both over-scrub harnesses unchanged; v4 metrics
+byte-identical.
