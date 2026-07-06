@@ -56,6 +56,10 @@ def main() -> int:
 
     predictions = load_jsonl(OUT_DIR / args.pred)
     context_by_id = {str(p["checkpoint_id"]): _prompt_context_text(p) for p in predictions}
+    # Round-2: query-echo grounding + the confirmation-attack gate need the
+    # user's own query text, not just the prompt context -- join the same way
+    # context_by_id already does, by checkpoint_id.
+    query_by_id = {str(p["checkpoint_id"]): str(p.get("query_text") or "") for p in predictions}
 
     answers = load_jsonl(OUT_DIR / args.answers)
 
@@ -73,9 +77,10 @@ def main() -> int:
         if cid not in context_by_id:
             n_missing_context_row += 1
         context_text = context_by_id.get(cid, "")
+        query_text = query_by_id.get(cid, "")
         output = row.get("output") or {}
         before_refused = bool(output.get("output_rail_refused"))
-        output = apply_rail_to_output(output, grounding_context=context_text)
+        output = apply_rail_to_output(output, grounding_context=context_text, query=query_text)
         row["output"] = output
         out_rows.append(row)
         n_ok += 1

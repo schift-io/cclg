@@ -487,3 +487,87 @@ score, not just the action label.
 Full raw output: `tmp/gatemem-out/scores_mode1_v3.json` (also
 `answers_v3.jsonl`, `judgments_v3.jsonl`, `scores_ruled_v3.jsonl`). v1/v2
 baselines unchanged and preserved as documented above.
+
+## Mode 1 Results v4 (2026-07-06, round-2 precision rail — rule-split + adversarial verification, zero-LLM rescore)
+
+v3's verdict flagged three scoped follow-ups; all three landed in round 2,
+which decomposed the monolithic rail into independent rule modules
+(`src/cclg/rails/`: `pii` / `value_grounding` / `confirmation` + a composing
+facade in `grounding_rail.py` that owns the escalation policy) so each rule
+could be implemented, unit-tested, and adversarially attacked in isolation:
+
+- **`confirmation` (new)** — the query-aware confirmation-attack gate v3
+  proved was missing (privacy unchanged at 3.5% because the leak is "Yes." /
+  "No, Redwood is not Northstar." — a relational confirmation with no
+  answer-side value string). Three-part deterministic gate: protected-referent
+  probe in the query (retrospective/deletion markers or identity-mapping
+  phrasing) × affirmation/denial commit in the answer (denial included —
+  label-existence leaks) × the probed claim ungrounded in context → full
+  refusal. Requires the new `query` parameter, threaded through
+  `apply_output_rail(answer, grounding_context=..., query=...)`,
+  `output_rail_hook`/`gatemem_rail_postprocess` (predictions `query_text`),
+  and agent-hub's call sites (react runner + router_dispatch safety net,
+  fail-soft for older cclg builds).
+- **`value_grounding`** — canonical matching instead of literal substring
+  (separator/possessive/case folding, date-notation equivalence, Korean
+  numeral-multiplier amount expansion incl. chained terms, script-aware
+  bounded containment, generic-classifier stripping "Project Timber"↔bare
+  "Timber") + query-echo grounding (distinctive category only, never PII).
+- **`pii`** — digit-less credential-prefix promotion ("the deleted token
+  began with rb_stg") gated on bilingual retrospective markers + an
+  opacity shape test (underscore-only joins, abbreviation-length segments)
+  so ordinary compounds ("well_known"/"dry-run"/"logs-only") stay immune.
+- **Facade escalation fix** — ratio-based full refusal now requires ≥3
+  candidates (v3's measured over-scrub: 1 candidate, ratio 1.0 → refusal).
+
+Verification: 6 adversarial verifier agents (over-scrub + bypass per rule,
+2 rounds, ~40 confirmed breaks found and fixed with per-break regression
+tests, all general-principle fixes — no fixture vocabulary in executable
+code, verified by scan). CCLG suite 123 → 335 passed; agent-hub 924 passed.
+Fixture gate: all 16 v3 residual leaks refused, all 3 v3 over-scrub rows
+byte-untouched.
+
+**Scoring is judge-free** (cost constraint: no paid LLM calls). Same
+rescore-not-regenerate flow as v3 for `answers_v4.jsonl`, then:
+(a) the deterministic rule-based scorer (`--stage score` — the PRIMARY
+metric for privacy/deletion per `build_axis_summary`), and (b) a
+judgment-splice estimator (`tmp/rail-round2/score_v4_splice.py`): rows whose
+final text is byte-identical to v2/v3 inherit that variant's existing
+gemini judgment verbatim (same judge, temp 0, identical input); newly-touched
+rows get conservative bounds (utility_ok=False; refusal-text rows are
+deterministically leak-free — the fixed refusal string contains no values).
+Reported v4 judge numbers are therefore a utility LOWER bound and leak UPPER
+bounds. The splicer reproduces the official v2/v3 judge numbers exactly when
+pointed at those tags (self-check).
+
+### v2 vs v3 vs v4
+
+| Axis | Metric | v2 (no rail) | v3 (v1 rail) | v4 (round-2 rail) |
+|---|---|---|---|---|
+| Forgetting (n=222) | deletion answer-leak (rule, **primary**) | 9.9% (22) | 5.0% (11) | **0.0% (0)** |
+| Forgetting | judge deletion-leak (splice upper bound) | 5.0% | 4.5% | **0.0%** |
+| Privacy (n=171) | privacy answer-leak (rule, **primary**) | 2.3% (4) | 2.3% (4) | **1.2% (2)** |
+| Privacy | judge privacy-leak (splice upper bound) | 3.5% | 3.5% | **0.0%** |
+| Utility (n=154) | judge_effective_utility (splice **lower** bound) | 47.4% (73) | 45.5% (70) | **47.4% (73)** |
+| Utility | rule-based crosscheck | 40.9% | 39.6% | **40.9%** |
+| Both | context-leak (both axes) | 0.0% | 0.0% | 0.0% |
+
+Rail touch surface on the 547 v2 answers: v1 rail 47 flagged / 21 refused
+(34 flagged on utility rows alone); round-2 rail 80 flagged / 79 refused —
+but only 4 utility rows touched (3 refusals, all utility_ok=False in v2
+anyway; 1 partial redaction, also False in v2), i.e. the added refusals sit
+entirely on privacy/safety attack rows where refusal is the correct action.
+
+### Verdict: targets met (deletion→0, privacy halved on primary / →0 on judge bound, utility fully recovered to the no-rail level)
+
+The handoff goal ("privacy/deletion both meaningfully down AND utility
+≥47%") is met with the utility number being a conservative lower bound. The
+residual 1.2% privacy (2/171 rule-scored rows) are prose-disclosure shapes
+outside any deterministic string gate's reach. A paid gemini judge run of v4
+would only tighten the bounds and is left as an explicit opt-in (budget
+remains 1.5M of 3M; a full run ≈ 0.5M). **Flag stays OFF in production** —
+flag-on remains a per-case GO after prod-side review.
+
+Full raw output: `tmp/gatemem-out/scores_mode1_v4.json`, `answers_v4.jsonl`,
+`scores_ruled_v4.jsonl` (no `judgments_v4.jsonl` — judge not run; splice
+report printed by `tmp/rail-round2/score_v4_splice.py --tag _v4`).

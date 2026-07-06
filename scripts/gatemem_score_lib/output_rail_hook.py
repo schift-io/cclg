@@ -32,11 +32,17 @@ def _warn_cclg_missing_once() -> None:
         print("[output_rail_hook] cclg.grounding_rail not importable -- rail is a no-op this run")
 
 
-def apply_rail_to_output(out: dict[str, Any], *, grounding_context: str) -> dict[str, Any]:
+def apply_rail_to_output(out: dict[str, Any], *, grounding_context: str, query: str = "") -> dict[str, Any]:
     """Scrub ``out["answer"]`` in place (mutates and returns the same dict)
     using the shared deterministic rail. No-op (with a one-time warning) if
     ``cclg`` is not importable in this venv -- a missing optional dependency
     should never crash a rescoring run.
+
+    ``query`` (round-2 addition) is the checkpoint's user query text --
+    passed straight through to ``cclg.grounding_rail.apply_output_rail`` for
+    query-echo grounding and the confirmation-attack gate. Defaults to ""
+    (same degrade-gracefully contract as the facade itself) for any caller
+    that does not have it.
 
     Known gap: only the top-level ``answer`` string is scrubbed;
     ``answer_structured`` (a free-form dict GateMem's own scorer/judge may
@@ -52,7 +58,7 @@ def apply_rail_to_output(out: dict[str, Any], *, grounding_context: str) -> dict
         _warn_cclg_missing_once()
         return out
 
-    result = apply_output_rail(answer, grounding_context=grounding_context)
+    result = apply_output_rail(answer, grounding_context=grounding_context, query=query)
     out["answer"] = result.text
     out["output_rail_flagged"] = result.flagged
     out["output_rail_refused"] = result.refused
