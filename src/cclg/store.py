@@ -61,7 +61,10 @@ class CCLGStore:
     def iter_nodes(self) -> Iterable[MemoryNode]:
         self.init()
         for path in sorted(self.nodes_dir.glob("*.json")):
-            yield MemoryNode.from_dict(self._read_json(path))
+            try:
+                yield MemoryNode.from_dict(self._read_json(path))
+            except Exception:  # noqa: BLE001 - skip an unrecoverable file rather than break the whole pack
+                continue
 
     def write_patch(self, patch: MemoryPatch) -> None:
         self.init()
@@ -79,7 +82,10 @@ class CCLGStore:
     def iter_patches(self) -> Iterable[MemoryPatch]:
         self.init()
         for path in sorted(self.patches_dir.glob("*.json")):
-            yield MemoryPatch.from_dict(self._read_json(path))
+            try:
+                yield MemoryPatch.from_dict(self._read_json(path))
+            except Exception:  # noqa: BLE001 - skip an unrecoverable file rather than break the whole pack
+                continue
 
     def write_edge(self, edge: MemoryEdge) -> None:
         self.init()
@@ -88,7 +94,10 @@ class CCLGStore:
     def iter_edges(self) -> Iterable[MemoryEdge]:
         self.init()
         for path in sorted(self.edges_dir.glob("*.json")):
-            yield MemoryEdge.from_dict(self._read_json(path))
+            try:
+                yield MemoryEdge.from_dict(self._read_json(path))
+            except Exception:  # noqa: BLE001 - skip an unrecoverable file rather than break the whole pack
+                continue
 
     def append_raw(self, name: str, text: str) -> Path:
         self.init()
@@ -111,7 +120,16 @@ class CCLGStore:
 
     @staticmethod
     def _read_json(path: Path) -> dict:
-        return json.loads(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # Defensive recovery for a partial/legacy write that left a stale tail
+            # behind a complete JSON object: take the first valid object and
+            # rewrite the file clean. Re-raises if nothing valid can be recovered.
+            obj, _ = json.JSONDecoder().raw_decode(text)
+            path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            return obj
 
     @staticmethod
     def _write_json(path: Path, value: dict) -> None:

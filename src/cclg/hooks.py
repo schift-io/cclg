@@ -27,14 +27,33 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = read_stdin_json()
-    store = CCLGStore(args.root)
-    if args.event in {"user-prompt", "session-start"}:
-        hook_event_name = "SessionStart" if args.event == "session-start" else "UserPromptSubmit"
-        output = user_prompt_context(store, payload, code_root=Path(args.code_root), max_chars=args.max_chars, include_codegraph=args.include_codegraph, hook_event_name=hook_event_name)
-    else:
-        output = ingest_event(store, args.event, payload)
+    try:
+        store = CCLGStore(args.root)
+        if args.event in {"user-prompt", "session-start"}:
+            hook_event_name = "SessionStart" if args.event == "session-start" else "UserPromptSubmit"
+            output = user_prompt_context(store, payload, code_root=Path(args.code_root), max_chars=args.max_chars, include_codegraph=args.include_codegraph, hook_event_name=hook_event_name)
+        else:
+            output = ingest_event(store, args.event, payload)
+    except Exception as exc:  # noqa: BLE001 - a memory hook must never break the host session
+        # Degrade gracefully: emit a valid continue:true payload and exit 0 so
+        # the host (Codex/Claude) proceeds even if CCLG hit an internal error.
+        output = _fallback_output(args.event, exc)
     print(json.dumps(output, ensure_ascii=False))
     return 0
+
+
+def _fallback_output(event: str, exc: Exception) -> dict[str, Any]:
+    output: dict[str, Any] = {
+        "schema_version": HOOK_OUTPUT_SCHEMA,
+        "continue": True,
+        "cclg": {"event": event, "error": f"{type(exc).__name__}: {exc}"},
+    }
+    if event in {"user-prompt", "session-start"}:
+        output["hookSpecificOutput"] = {
+            "hookEventName": "SessionStart" if event == "session-start" else "UserPromptSubmit",
+            "additionalContext": "",
+        }
+    return output
 
 
 def read_stdin_json() -> dict[str, Any]:
