@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from uuid import uuid4
 
@@ -22,7 +23,15 @@ def load_session(store: CCLGStore, session_id: str) -> dict:
     path = session_path(store, session_id)
     if not path.exists():
         return new_session_state(session_id=session_id)
-    session = json.loads(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    try:
+        session = json.loads(text)
+    except json.JSONDecodeError:
+        # Defensive recovery: a legacy/partial write may have left a stale tail
+        # behind a complete JSON object. Take the first valid object instead of
+        # crashing the hook, and rewrite the file clean.
+        session, _ = json.JSONDecoder().raw_decode(text)
+        path.write_text(json.dumps(session, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     session.setdefault("schema_version", SESSION_SCHEMA)
     for key, value in new_session_state(session_id=session.get("id", session_id)).items():
         session.setdefault(key, value)
@@ -32,7 +41,14 @@ def load_session(store: CCLGStore, session_id: str) -> dict:
 def save_session(store: CCLGStore, session: dict) -> None:
     session.setdefault("schema_version", SESSION_SCHEMA)
     session["updated_at"] = now_iso()
-    session_path(store, session["id"]).write_text(json.dumps(session, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path = session_path(store, session["id"])
+    data = json.dumps(session, ensure_ascii=False, indent=2) + "\n"
+    # Atomic write: a concurrent writer must never leave a stale tail behind a
+    # shorter payload. Write to a unique temp file, then os.replace() (atomic on
+    # POSIX) so readers only ever see a complete JSON object.
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(data, encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def append_session_event(store: CCLGStore, *, session_id: str | None, event: str, payload: dict) -> dict:

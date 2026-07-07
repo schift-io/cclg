@@ -116,4 +116,9 @@ class CCLGStore:
     @staticmethod
     def _write_json(path: Path, value: dict) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        data = json.dumps(value, ensure_ascii=False, indent=2) + "\n"
+        # Atomic write so a concurrent writer can never leave a stale tail behind
+        # a shorter payload (temp file + atomic rename).
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+        tmp.write_text(data, encoding="utf-8")
+        os.replace(tmp, path)
