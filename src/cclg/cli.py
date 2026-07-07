@@ -14,7 +14,7 @@ from .patches import active_nodes, apply_patch, conflict_nodes, detect_patch_can
 from .retrieval import search_memory, search_nodes
 from .schema import validate_edge, validate_node, validate_patch, validate_session
 from .session import end_session, fork_session, load_session, merge_session, promote_session_node, start_session, write_overlay_node
-from .store import CCLGStore
+from .store import CCLGStore, atomic_write_text
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -614,7 +614,7 @@ def run_dense(store: CCLGStore, args) -> int:
             if hasattr(provider, "_ensure_model"):
                 provider._ensure_model()
     config["dense"] = dense
-    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(config_path, json.dumps(config, ensure_ascii=False, indent=2) + "\n")
     store.append_audit({"event": "dense_config_changed", "enabled": dense.get("enabled"), "provider": dense.get("provider"), "model": dense.get("model")})
     print(json.dumps({"dense": dense}, ensure_ascii=False, indent=2))
     return 0

@@ -10,6 +10,7 @@ from typing import Any
 
 from .format import CODE_GRAPH_SCHEMA
 from .models import now_iso
+from .store import atomic_write_text
 from .retrieval import tokenize
 
 
@@ -327,8 +328,9 @@ def render_code_pack(graph: CodeGraph, query: str, *, limit: int = 20) -> str:
 
 
 def save_code_graph(graph: CodeGraph, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(graph.to_dict(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # Atomic: concurrent user-prompt hooks rebuild the same codegraph path and
+    # must not tear it for a concurrent reader (render_code_pack).
+    atomic_write_text(path, json.dumps(graph.to_dict(), ensure_ascii=False, indent=2) + "\n")
 
 
 def load_code_graph(path: Path) -> CodeGraph:

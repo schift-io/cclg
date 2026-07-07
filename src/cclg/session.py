@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import contextlib
 import json
-import os
 from pathlib import Path
 from uuid import uuid4
 
+try:  # POSIX advisory locking; absent on non-POSIX platforms (best-effort there).
+    import fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    fcntl = None  # type: ignore[assignment]
+
 from .format import SESSION_SCHEMA
 from .models import MemoryNode, now_iso
-from .store import CCLGStore
+from .store import CCLGStore, atomic_write_text
 
 
 def normalize_session_id(session_id: str | None = None) -> str:
@@ -17,6 +22,30 @@ def normalize_session_id(session_id: str | None = None) -> str:
 def session_path(store: CCLGStore, session_id: str) -> Path:
     store.init()
     return store.sessions_dir / f"{session_id}.json"
+
+
+@contextlib.contextmanager
+def session_lock(store: CCLGStore, session_id: str):
+    """Serialize a load-modify-save critical section for one session.
+
+    Atomic writes stop *corruption* but not *lost updates*: two concurrent hooks
+    could each load the same session, append their own event, and save — the last
+    writer silently dropping the other's event. An exclusive advisory lock (flock)
+    on a per-session lock file makes the read-modify-write region mutually
+    exclusive across processes (and threads, since each acquires its own fd).
+    On non-POSIX platforms without fcntl this degrades to a no-op (best-effort).
+    """
+    store.init()
+    if fcntl is None:  # pragma: no cover - non-POSIX best-effort
+        yield
+        return
+    lock_path = store.sessions_dir / f".{session_id}.lock"
+    with open(lock_path, "w", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def load_session(store: CCLGStore, session_id: str) -> dict:
@@ -31,7 +60,7 @@ def load_session(store: CCLGStore, session_id: str) -> dict:
         # behind a complete JSON object. Take the first valid object instead of
         # crashing the hook, and rewrite the file clean.
         session, _ = json.JSONDecoder().raw_decode(text)
-        path.write_text(json.dumps(session, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        atomic_write_text(path, json.dumps(session, ensure_ascii=False, indent=2) + "\n")
     session.setdefault("schema_version", SESSION_SCHEMA)
     for key, value in new_session_state(session_id=session.get("id", session_id)).items():
         session.setdefault(key, value)
@@ -42,21 +71,20 @@ def save_session(store: CCLGStore, session: dict) -> None:
     session.setdefault("schema_version", SESSION_SCHEMA)
     session["updated_at"] = now_iso()
     path = session_path(store, session["id"])
-    data = json.dumps(session, ensure_ascii=False, indent=2) + "\n"
     # Atomic write: a concurrent writer must never leave a stale tail behind a
-    # shorter payload. Write to a unique temp file, then os.replace() (atomic on
-    # POSIX) so readers only ever see a complete JSON object.
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-    tmp.write_text(data, encoding="utf-8")
-    os.replace(tmp, path)
+    # shorter payload, so readers only ever see a complete JSON object.
+    atomic_write_text(path, json.dumps(session, ensure_ascii=False, indent=2) + "\n")
 
 
 def append_session_event(store: CCLGStore, *, session_id: str | None, event: str, payload: dict) -> dict:
     sid = normalize_session_id(session_id)
-    session = load_session(store, sid)
     record = {"event": event, "payload": payload, "created_at": now_iso()}
-    session.setdefault("events", []).append(record)
-    save_session(store, session)
+    # Lock the load-modify-save region so concurrent hook events on the same
+    # session cannot lose each other's appends (see session_lock).
+    with session_lock(store, sid):
+        session = load_session(store, sid)
+        session.setdefault("events", []).append(record)
+        save_session(store, session)
     store.append_raw(f"{sid}-{event}-{record['created_at'].replace(':', '')}.json", json.dumps(record, ensure_ascii=False, indent=2))
     store.append_audit({"event": "session_event", "session_id": sid, "session_event": event})
     return session
@@ -119,28 +147,29 @@ def start_session(
 
 
 def end_session(store: CCLGStore, session_id: str, *, status: str = "ended", policy: str = "keep") -> dict:
-    session = load_session(store, session_id)
     promoted: list[str] = []
     discarded: list[str] = []
-    if policy in {"promote", "discard"}:
-        for node_id in list(session.get("session_overlay_ids", [])):
-            path = store.nodes_dir / f"{node_id}.json"
-            if not path.exists():
-                continue
-            node = store.read_node(node_id)
-            if node.status != "active_session":
-                continue
-            if policy == "promote":
-                _promote(store, node)
-                promoted.append(node_id)
-            else:
-                node.status = "discarded"
-                node.updated_at = now_iso()
-                store.write_node(node)
-                discarded.append(node_id)
-    session["status"] = status
-    session["ended_at"] = now_iso()
-    save_session(store, session)
+    with session_lock(store, session_id):
+        session = load_session(store, session_id)
+        if policy in {"promote", "discard"}:
+            for node_id in list(session.get("session_overlay_ids", [])):
+                path = store.nodes_dir / f"{node_id}.json"
+                if not path.exists():
+                    continue
+                node = store.read_node(node_id)
+                if node.status != "active_session":
+                    continue
+                if policy == "promote":
+                    _promote(store, node)
+                    promoted.append(node_id)
+                else:
+                    node.status = "discarded"
+                    node.updated_at = now_iso()
+                    store.write_node(node)
+                    discarded.append(node_id)
+        session["status"] = status
+        session["ended_at"] = now_iso()
+        save_session(store, session)
     store.append_audit({"event": "session_ended", "session_id": session_id, "status": status, "policy": policy, "promoted": promoted, "discarded": discarded})
     session["promoted_node_ids"] = promoted
     session["discarded_node_ids"] = discarded
@@ -158,10 +187,11 @@ def _promote(store: CCLGStore, node: MemoryNode) -> MemoryNode:
 
 
 def promote_session_node(store: CCLGStore, *, session_id: str, node_id: str) -> MemoryNode:
-    session = load_session(store, session_id)
-    if node_id not in session.get("session_overlay_ids", []):
-        raise ValueError(f"node {node_id} is not an overlay of session {session_id}")
-    node = _promote(store, store.read_node(node_id))
+    with session_lock(store, session_id):
+        session = load_session(store, session_id)
+        if node_id not in session.get("session_overlay_ids", []):
+            raise ValueError(f"node {node_id} is not an overlay of session {session_id}")
+        node = _promote(store, store.read_node(node_id))
     store.append_audit({"event": "session_node_promoted", "session_id": session_id, "node_id": node_id})
     return node
 
@@ -184,35 +214,36 @@ def fork_session(store: CCLGStore, parent_session_id: str, *, branch_name: str =
 
 
 def merge_session(store: CCLGStore, session_id: str) -> dict:
-    session = load_session(store, session_id)
-    active_keys = {
-        node.key: node.id
-        for node in store.iter_nodes()
-        if node.status == "active" and node.key and node.id not in session.get("session_overlay_ids", [])
-    }
     merged: list[str] = []
     conflicts: list[str] = []
-    for node_id in list(session.get("session_overlay_ids", [])):
-        path = store.nodes_dir / f"{node_id}.json"
-        if not path.exists():
-            continue
-        node = store.read_node(node_id)
-        if node.status != "active_session":
-            continue
-        if node.key and node.key in active_keys:
-            node.status = "conflict_pending"
-            scope = dict(node.scope)
-            scope["session"] = None
-            node.scope = scope
-            node.updated_at = now_iso()
-            store.write_node(node)
-            conflicts.append(node_id)
-        else:
-            _promote(store, node)
-            merged.append(node_id)
-    session["status"] = "merged"
-    session["ended_at"] = now_iso()
-    save_session(store, session)
+    with session_lock(store, session_id):
+        session = load_session(store, session_id)
+        active_keys = {
+            node.key: node.id
+            for node in store.iter_nodes()
+            if node.status == "active" and node.key and node.id not in session.get("session_overlay_ids", [])
+        }
+        for node_id in list(session.get("session_overlay_ids", [])):
+            path = store.nodes_dir / f"{node_id}.json"
+            if not path.exists():
+                continue
+            node = store.read_node(node_id)
+            if node.status != "active_session":
+                continue
+            if node.key and node.key in active_keys:
+                node.status = "conflict_pending"
+                scope = dict(node.scope)
+                scope["session"] = None
+                node.scope = scope
+                node.updated_at = now_iso()
+                store.write_node(node)
+                conflicts.append(node_id)
+            else:
+                _promote(store, node)
+                merged.append(node_id)
+        session["status"] = "merged"
+        session["ended_at"] = now_iso()
+        save_session(store, session)
     store.append_audit({"event": "session_merged", "session_id": session_id, "merged": merged, "conflicts": conflicts})
     return {"session_id": session_id, "merged_node_ids": merged, "conflict_node_ids": conflicts}
 
@@ -239,7 +270,9 @@ def write_overlay_node(
     )
     node.status = "active_session"
     store.write_node(node)
-    session.setdefault("session_overlay_ids", []).append(node.id)
-    save_session(store, session)
+    with session_lock(store, session_id):
+        session = load_session(store, session_id)
+        session.setdefault("session_overlay_ids", []).append(node.id)
+        save_session(store, session)
     store.append_audit({"event": "session_overlay_written", "session_id": session_id, "node_id": node.id})
     return node

@@ -1,15 +1,38 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from pathlib import Path
 from typing import Iterable
+from uuid import uuid4
 
 from .format import STORE_SCHEMA
 from .models import MemoryEdge, MemoryNode, MemoryPatch, now_iso
 
 
 DEFAULT_HOME = Path(os.environ.get("CCLG_HOME", "~/.cclg")).expanduser()
+
+
+def atomic_write_text(path: Path, data: str) -> None:
+    """Write ``data`` to ``path`` atomically (temp file + os.replace).
+
+    A concurrent writer can never observe a partial payload or leave a stale tail
+    behind a shorter one: readers either see the old file or the fully-written new
+    one. The temp name carries pid + a random suffix so two writers (even threads
+    in one process) never collide on it, and is hidden + suffixed ``.tmp`` so it is
+    never picked up by the store's ``*.json`` globs. A failed write cleans up its
+    own temp file; a hard crash may leave one behind, which is harmless.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{uuid4().hex[:8]}.tmp")
+    try:
+        tmp.write_text(data, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(FileNotFoundError):
+            tmp.unlink()
+        raise
 
 
 class CCLGStore:
@@ -36,7 +59,10 @@ class CCLGStore:
             path.mkdir(parents=True, exist_ok=True)
         config_path = self.root / "config.json"
         if not config_path.exists():
-            config_path.write_text(
+            # Atomic so two processes racing on first-time init cannot interleave
+            # a torn config; identical content means last-writer-wins is harmless.
+            atomic_write_text(
+                config_path,
                 json.dumps(
                     {
                         "schema_version": STORE_SCHEMA,
@@ -48,7 +74,6 @@ class CCLGStore:
                     indent=2,
                 )
                 + "\n",
-                encoding="utf-8",
             )
 
     def write_node(self, node: MemoryNode) -> None:
@@ -102,12 +127,13 @@ class CCLGStore:
     def append_raw(self, name: str, text: str) -> Path:
         self.init()
         safe_name = "".join(c if c.isalnum() or c in "._-" else "-" for c in name)
-        path = self.raw_dir / safe_name
-        if path.exists():
-            stem = path.stem
-            suffix = path.suffix
-            path = self.raw_dir / f"{stem}-{now_iso().replace(':', '')}{suffix}"
-        path.write_text(text, encoding="utf-8")
+        stem = Path(safe_name).stem or "raw"
+        suffix = Path(safe_name).suffix or ".json"
+        # Always mint a unique name (timestamp + random) so two concurrent writers
+        # can never collide on the same path and clobber each other's payload — the
+        # previous exists() guard raced (both saw "not exists" and overwrote).
+        path = self.raw_dir / f"{stem}-{now_iso().replace(':', '')}-{uuid4().hex[:8]}{suffix}"
+        atomic_write_text(path, text)
         self.append_audit({"event": "raw_written", "path": str(path), "created_at": now_iso()})
         return path
 
@@ -128,15 +154,9 @@ class CCLGStore:
             # behind a complete JSON object: take the first valid object and
             # rewrite the file clean. Re-raises if nothing valid can be recovered.
             obj, _ = json.JSONDecoder().raw_decode(text)
-            path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            atomic_write_text(path, json.dumps(obj, ensure_ascii=False, indent=2) + "\n")
             return obj
 
     @staticmethod
     def _write_json(path: Path, value: dict) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        data = json.dumps(value, ensure_ascii=False, indent=2) + "\n"
-        # Atomic write so a concurrent writer can never leave a stale tail behind
-        # a shorter payload (temp file + atomic rename).
-        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-        tmp.write_text(data, encoding="utf-8")
-        os.replace(tmp, path)
+        atomic_write_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")

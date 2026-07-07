@@ -217,8 +217,10 @@ class CachedBackend:
         return {}
 
     def _save(self, cache: dict[str, Any]) -> None:
-        self.cache_path.parent.mkdir(parents=True, exist_ok=True)
-        self.cache_path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+        from .store import atomic_write_text
+
+        # Atomic so a concurrent warm() cannot tear the embedding cache.
+        atomic_write_text(self.cache_path, json.dumps(cache, ensure_ascii=False))
 
     def warm(self, nodes: list[MemoryNode]) -> int:
         """Embed and cache any uncached/changed nodes. Returns count embedded."""

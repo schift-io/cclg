@@ -8,7 +8,7 @@ from .format import CCLG_NAMESPACE
 from .models import now_iso
 from .patches import active_nodes
 from .retrieval import tokenize
-from .store import CCLGStore
+from .store import CCLGStore, atomic_write_text
 
 
 INDEX_SCHEMA = "cclg.index.v0.1"
@@ -55,7 +55,7 @@ def build_index(store: CCLGStore) -> dict[str, Any]:
     # N-Triples export so an external SPARQL store (e.g. Oxigraph) can load the
     # memory graph directly. Optional consumer; the JSON adjacency stays primary.
     triples = export_ntriples(store)
-    (index_dir / "graph" / "memory.nt").write_text(triples, encoding="utf-8")
+    atomic_write_text(index_dir / "graph" / "memory.nt", triples)
 
     dense_status = "disabled"
     dense_embedded = 0
@@ -117,5 +117,4 @@ def export_ntriples(store: CCLGStore) -> str:
 
 
 def _write(path, value: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
