@@ -26,8 +26,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    payload = read_stdin_json()
     try:
+        # stdin read is inside the guard too: a non-UTF-8 stdin would otherwise
+        # raise UnicodeDecodeError here and escape the hook.
+        payload = read_stdin_json()
         store = CCLGStore(args.root)
         if args.event in {"user-prompt", "session-start"}:
             hook_event_name = "SessionStart" if args.event == "session-start" else "UserPromptSubmit"
@@ -38,8 +40,33 @@ def main(argv: list[str] | None = None) -> int:
         # Degrade gracefully: emit a valid continue:true payload and exit 0 so
         # the host (Codex/Claude) proceeds even if CCLG hit an internal error.
         output = _fallback_output(args.event, exc)
-    print(json.dumps(output, ensure_ascii=False))
+    _emit(output)
     return 0
+
+
+def _emit(output: dict[str, Any]) -> None:
+    """Emit the hook payload without ever raising.
+
+    This is the one operation that runs on EVERY invocation (success and fallback
+    alike), so it must not crash the host. Two hazards: (1) ``print`` goes through
+    stdout's text codec, so a non-UTF-8 locale/PYTHONIOENCODING raises
+    UnicodeEncodeError on the non-ASCII content ``ensure_ascii=False`` produces
+    (this is a Korean-heavy store); we bypass the text layer and write UTF-8 bytes
+    directly. (2) A closed read end raises BrokenPipeError/OSError; we swallow it.
+    """
+    text = json.dumps(output, ensure_ascii=False)
+    try:
+        buffer = getattr(sys.stdout, "buffer", None)
+        if buffer is not None:
+            buffer.write(text.encode("utf-8", "replace") + b"\n")
+            buffer.flush()
+        else:  # stdout replaced (e.g. a StringIO in tests) — no binary buffer
+            sys.stdout.write(text + "\n")
+            sys.stdout.flush()
+    except (BrokenPipeError, OSError):
+        pass
+    except Exception:  # noqa: BLE001 - last resort: an emit error must not break the host
+        pass
 
 
 def _fallback_output(event: str, exc: Exception) -> dict[str, Any]:
@@ -61,9 +88,14 @@ def read_stdin_json() -> dict[str, Any]:
     if not raw.strip():
         return {}
     try:
-        return json.loads(raw)
+        parsed = json.loads(raw)
     except json.JSONDecodeError:
         return {"raw_stdin": raw}
+    if not isinstance(parsed, dict):
+        # Valid JSON but not an object (list/str/number): wrap it so downstream
+        # .get() calls don't blow up and the event is still recorded.
+        return {"raw_stdin": raw, "parsed": parsed}
+    return parsed
 
 
 def user_prompt_context(

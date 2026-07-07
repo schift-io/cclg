@@ -151,10 +151,11 @@ class CCLGStore:
             return json.loads(text)
         except json.JSONDecodeError:
             # Defensive recovery for a partial/legacy write that left a stale tail
-            # behind a complete JSON object: take the first valid object and
-            # rewrite the file clean. Re-raises if nothing valid can be recovered.
+            # behind a complete JSON object: return the first valid object IN
+            # MEMORY only. Do NOT rewrite on the read path — that could clobber a
+            # concurrent writer's newer version; the next atomic write heals it.
+            # Re-raises if nothing valid can be recovered.
             obj, _ = json.JSONDecoder().raw_decode(text)
-            atomic_write_text(path, json.dumps(obj, ensure_ascii=False, indent=2) + "\n")
             return obj
 
     @staticmethod

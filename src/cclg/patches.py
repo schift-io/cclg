@@ -1,10 +1,39 @@
 from __future__ import annotations
 
+import contextlib
 import re
+
+try:  # POSIX advisory locking; absent on non-POSIX platforms (best-effort there).
+    import fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    fcntl = None  # type: ignore[assignment]
 
 from .models import MemoryEdge, MemoryNode, MemoryPatch, now_iso
 from .retrieval import SearchHit, search_nodes
 from .store import CCLGStore
+
+
+@contextlib.contextmanager
+def _patch_lock(store: CCLGStore):
+    """Serialize patch application across concurrent processes.
+
+    apply_patch does a multi-file read-modify-write (retire targets + write the
+    replacement + patch + edges). Two concurrent apply_patch calls on overlapping
+    targets could interleave and drop a ``superseded_by`` link or leave duplicate
+    active supersedors. An exclusive advisory lock makes application atomic.
+    Degrades to a no-op on non-POSIX platforms.
+    """
+    store.init()
+    if fcntl is None:  # pragma: no cover - non-POSIX best-effort
+        yield
+        return
+    lock_path = store.patches_dir / ".patches.lock"
+    with open(lock_path, "w", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 EDGE_BY_OPERATION = {
@@ -50,6 +79,11 @@ RETIRING_PATCH_OPERATIONS = SUPERSEDING_OPERATIONS | {"expire", "forget", "depre
 
 def apply_patch(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
     """Apply a memory patch and return nodes written by the operation."""
+    with _patch_lock(store):
+        return _apply_patch_locked(store, patch)
+
+
+def _apply_patch_locked(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
     written: list[MemoryNode] = []
     targets = [store.read_node(target_id) for target_id in patch.target_ids]
     patch.prior_states = {target.id: target.status for target in targets}
@@ -84,6 +118,17 @@ def apply_patch(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
     if patch.operation in SUPERSEDING_OPERATIONS:
         new_node.relations["supersedes"] = [target.id for target in targets]
 
+    # Create-then-retire: persist the replacement (and the patch record, which
+    # also carries new_content) BEFORE retiring the targets. A crash or a
+    # concurrent reader between the two writes then sees a harmless transient
+    # duplicate (old + new both present, collapsed by scope/key precedence)
+    # instead of a target retired with no replacement on disk — which would lose
+    # the fact permanently and leave a dangling superseded_by.
+    patch.new_node_ids = [new_node.id]
+    patch.applied_at = now_iso()
+    store.write_node(new_node)
+    store.write_patch(patch)
+
     old_status = "superseded" if patch.operation in SUPERSEDING_OPERATIONS else "active"
     for node in targets:
         node.status = old_status
@@ -93,10 +138,6 @@ def apply_patch(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
         store.write_node(node)
         written.append(node)
 
-    store.write_node(new_node)
-    patch.new_node_ids = [new_node.id]
-    patch.applied_at = now_iso()
-    store.write_patch(patch)
     for target in targets:
         edge = MemoryEdge.create(from_id=new_node.id, to_id=target.id, edge_type=relation_key, source_patch_id=patch.id)
         store.write_edge(edge)

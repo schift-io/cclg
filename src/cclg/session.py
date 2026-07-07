@@ -15,13 +15,28 @@ from .models import MemoryNode, now_iso
 from .store import CCLGStore, atomic_write_text
 
 
+def _safe_session_id(session_id: str) -> str:
+    """Collapse a session id to a filename-safe token.
+
+    session_id arrives from the hook payload (attacker-influenced), and is used
+    verbatim to build filesystem paths — a value like ``../../etc/x`` would escape
+    the store and write arbitrary files. Whitelist to ``[A-Za-z0-9._-]`` and reject
+    any traversal, so the id can only ever name a file inside sessions_dir.
+    """
+    token = "".join(c if (c.isalnum() or c in "._-") else "-" for c in str(session_id))
+    token = token.lstrip(".") or "session"  # never a dotfile / empty / bare dots
+    return token[:200]
+
+
 def normalize_session_id(session_id: str | None = None) -> str:
-    return session_id or f"session_{uuid4().hex[:12]}"
+    if not session_id:
+        return f"session_{uuid4().hex[:12]}"
+    return _safe_session_id(session_id)
 
 
 def session_path(store: CCLGStore, session_id: str) -> Path:
     store.init()
-    return store.sessions_dir / f"{session_id}.json"
+    return store.sessions_dir / f"{_safe_session_id(session_id)}.json"
 
 
 @contextlib.contextmanager
@@ -39,7 +54,7 @@ def session_lock(store: CCLGStore, session_id: str):
     if fcntl is None:  # pragma: no cover - non-POSIX best-effort
         yield
         return
-    lock_path = store.sessions_dir / f".{session_id}.lock"
+    lock_path = store.sessions_dir / f".{_safe_session_id(session_id)}.lock"
     with open(lock_path, "w", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
@@ -57,10 +72,11 @@ def load_session(store: CCLGStore, session_id: str) -> dict:
         session = json.loads(text)
     except json.JSONDecodeError:
         # Defensive recovery: a legacy/partial write may have left a stale tail
-        # behind a complete JSON object. Take the first valid object instead of
-        # crashing the hook, and rewrite the file clean.
+        # behind a complete JSON object. Recover the first valid object IN MEMORY
+        # only — do not rewrite here. A rewrite on the read path could clobber a
+        # concurrent writer's newer version; the next legitimate atomic save
+        # persists a clean file.
         session, _ = json.JSONDecoder().raw_decode(text)
-        atomic_write_text(path, json.dumps(session, ensure_ascii=False, indent=2) + "\n")
     session.setdefault("schema_version", SESSION_SCHEMA)
     for key, value in new_session_state(session_id=session.get("id", session_id)).items():
         session.setdefault(key, value)
@@ -133,15 +149,21 @@ def start_session(
     branch_name: str = "main",
 ) -> dict:
     sid = normalize_session_id(session_id)
-    session = new_session_state(
-        session_id=sid,
-        agent=agent,
-        workspace=workspace,
-        project=project,
-        parent_session_id=parent_session_id,
-        branch_name=branch_name,
-    )
-    save_session(store, session)
+    with session_lock(store, sid):
+        # Idempotent: a repeated session-start (e.g. resume, or the same id seen
+        # twice) must not wipe an existing session's events/overlays and orphan
+        # its overlay nodes. Return the existing session instead of overwriting.
+        if session_path(store, sid).exists():
+            return load_session(store, sid)
+        session = new_session_state(
+            session_id=sid,
+            agent=agent,
+            workspace=workspace,
+            project=project,
+            parent_session_id=parent_session_id,
+            branch_name=branch_name,
+        )
+        save_session(store, session)
     store.append_audit({"event": "session_started", "session_id": sid})
     return session
 
