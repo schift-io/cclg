@@ -203,10 +203,12 @@ class ContainerForwardCompatTests(unittest.TestCase):
         self.assertEqual(len(bundle.unknown_sections["future_experimental_section"]), 1)
         self.assertTrue(any("future_experimental_section" in warning for warning in bundle.warnings))
 
-    def test_format_id_mismatch_warns_but_still_loads(self) -> None:
-        """docs/CCLG_CONTAINER.md §4: header.format_id is an informational
-        cross-check — a mismatch is a warning, not a hard failure, since
-        per-record schema_version is the authoritative check."""
+    def test_format_id_mismatch_is_a_hard_error(self) -> None:
+        """docs/CCLG_CONTAINER.md §4 (fail-closed load semantics, escalated
+        2026-07-10): header.format_id used to be an informational
+        warn-only cross-check; it is now a hard ContainerError, since a
+        mismatch means this reader's operation/schema classification is not
+        proven to hold for the container."""
         node = MemoryNode.create(content="format id cross-check", source="test:format-id")
         text = pack_container([node])
 
@@ -217,11 +219,9 @@ class ContainerForwardCompatTests(unittest.TestCase):
         lines[1] = json.dumps(header, ensure_ascii=False)
         tampered = "\n".join(lines)
 
-        bundle = load_container(tampered)
-
-        self.assertEqual(len(bundle.nodes), 1)
-        self.assertEqual(bundle.nodes[0]["content"], "format id cross-check")
-        self.assertTrue(any("format_id" in warning for warning in bundle.warnings))
+        with self.assertRaises(ContainerError) as ctx:
+            load_container(tampered)
+        self.assertIn("format_id", str(ctx.exception))
 
 
 class ContainerLedgerOnlyTests(unittest.TestCase):

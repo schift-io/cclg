@@ -1,0 +1,7 @@
+{
+  "description": "Four same-key nodes at global/workspace/project/session scope; session > project > workspace > global collapses to the session node.",
+  "effective_view_node_ids": [
+    "mem_scope_session"
+  ],
+  "session_id": "sess_scope_precedence"
+}

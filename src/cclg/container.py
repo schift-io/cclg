@@ -331,12 +331,37 @@ def load_container(text: str, *, validate: bool = True) -> ContainerBundle:
     malformed header, section/checksum count mismatch (including a section
     present in the body but missing its ``counts``/``sections`` header entry,
     docs/CCLG_CONTAINER.md §5), checksum mismatch, an auth field anywhere in
-    header or records, or (when ``validate=True``) any record failing its
-    ``schema.py`` validator. Unknown sections are not an error: they are
-    collected into ``ContainerBundle.unknown_sections`` with a warning, per
-    docs/CCLG_CONTAINER.md §7. A ``header.format_id`` that does not match this
-    reader's ``CCLG_FORMAT_ID`` is likewise not an error: it is appended to
-    ``ContainerBundle.warnings``, per §4.
+    header or records, a ``header.format_id`` that does not match this
+    reader's ``CCLG_FORMAT_ID`` (see below — escalated from warn to error,
+    2026-07-10), or (when ``validate=True``) any record failing its
+    ``schema.py`` validator.
+
+    Two categories of "the file has more than this reader expects" are
+    handled very differently, and the difference is deliberate, not an
+    oversight:
+
+    - **Unknown *sections*** (a `@something` marker this reader doesn't know)
+      are harmless forward-compat additions — extra *data* a future producer
+      attached that says nothing about how to interpret the sections this
+      reader does understand. These are collected into
+      ``ContainerBundle.unknown_sections`` with a warning and loading
+      continues normally, per docs/CCLG_CONTAINER.md §7.
+    - **A ``header.format_id`` mismatch** means the record *schemas* this
+      container's `@nodes`/`@patches`/`@edges`/`@sessions` bodies were
+      validated against, at pack time, are not the ones this reader's
+      `schema.py` implements — a *semantic* mismatch, not an additive one.
+      docs/CCLG_CONTAINER.md §4 originally specified this as a warn-only
+      informational cross-check (record-level `schema_version` was deemed
+      the authoritative check). That is now treated as a fail-open gap for
+      exactly the same reason unknown patch operations are
+      (`patches.UnknownPatchOperationError`): silently proceeding on a
+      format-id mismatch trusts that this reader's fixed, closed
+      classification of every patch operation (`patches.
+      KNOWN_PATCH_OPERATIONS`) still holds for a container produced against a
+      *different* format version, which is exactly the assumption a format
+      bump exists to break. A reader that cannot name the format it's reading
+      must not guess that its own semantics still apply — so this is now a
+      hard ``ContainerError``, not a warning.
     """
     raw_lines = text.split("\n")
     if raw_lines and raw_lines[-1] == "":
@@ -423,16 +448,17 @@ def load_container(text: str, *, validate: bool = True) -> ContainerBundle:
             if expected != actual:
                 raise ContainerError(f"count mismatch for '{name}': header.{source_name} says {expected}, body has {actual}")
 
-    warnings: list[str] = []
     if header.get("format_id") != CCLG_FORMAT_ID:
-        # §4: informational cross-check only — warn, don't hard-fail. The
-        # authoritative check is each record's own schema_version, re-validated
-        # per-record below regardless of what this header field claims.
-        warnings.append(
+        # Escalated from warn to error (2026-07-10, fail-closed load
+        # semantics — see the docstring above): a format_id mismatch means
+        # this reader's operation/schema classification is not proven to
+        # hold for this container, so it must not be loaded silently.
+        raise ContainerError(
             f"format_id mismatch: header declares {header.get('format_id')!r}, this reader implements "
-            f"{CCLG_FORMAT_ID!r} — continuing per docs/CCLG_CONTAINER.md §4 (record-level schema_version "
-            "is the authoritative check)"
+            f"{CCLG_FORMAT_ID!r} — refusing to load (docs/CCLG_CONTAINER.md §4, fail-closed)"
         )
+
+    warnings: list[str] = []
     unknown_sections: dict[str, list[dict[str, Any]]] = {}
     for name in section_order:
         if name not in SECTION_ORDER:

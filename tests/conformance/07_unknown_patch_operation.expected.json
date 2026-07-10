@@ -1,0 +1,5 @@
+{
+  "description": "A patch operation ('archive') outside the v1 closed set. Must error both at default (validate=True) load and, if loaded with validate=False, at effective-view computation.",
+  "expect_error": "load_default_and_effective_view",
+  "session_id": null
+}

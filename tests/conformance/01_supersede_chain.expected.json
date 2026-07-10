@@ -1,0 +1,7 @@
+{
+  "description": "A -> B -> C supersede chain; A's status is left unbaked ('active') to test patch-driven exclusion independent of baked status.",
+  "effective_view_node_ids": [
+    "mem_chain_c"
+  ],
+  "session_id": null
+}

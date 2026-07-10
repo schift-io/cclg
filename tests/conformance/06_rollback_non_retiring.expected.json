@@ -1,0 +1,8 @@
+{
+  "description": "'rollback' does not retire its target -- both nodes remain in the effective view.",
+  "effective_view_node_ids": [
+    "mem_rollback_a",
+    "mem_rollback_b"
+  ],
+  "session_id": null
+}

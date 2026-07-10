@@ -76,6 +76,29 @@ SUPERSEDING_OPERATIONS = {
 # status is left `active`).
 RETIRING_PATCH_OPERATIONS = SUPERSEDING_OPERATIONS | {"expire", "forget", "deprecate"}
 
+# The complete closed set of patch operations this reader's effective-view
+# logic has classified one way or the other: either retiring
+# (RETIRING_PATCH_OPERATIONS) or explicitly known-non-retiring ("create",
+# "rollback" — see the comment above). Mirrors `schema.PATCH_OPERATIONS`
+# exactly; kept as a separate constant here (rather than importing schema.py)
+# because this module must not depend on schema.py's validator wiring.
+KNOWN_PATCH_OPERATIONS = RETIRING_PATCH_OPERATIONS | {"create", "rollback"}
+
+
+class UnknownPatchOperationError(ValueError):
+    """Raised by `effective_view()` when a patch's `operation` is not in
+    `KNOWN_PATCH_OPERATIONS` (docs/CCLG_CONTAINER.md §3.1.1 fail-closed load
+    semantics).
+
+    An operation this reader doesn't recognize as retiring-or-not is not safe
+    to silently treat as non-retiring: a future container format version (or
+    a hand-edited/corrupted patch record) could carry an operation that
+    *should* retire its target, and computing an effective view that quietly
+    ignores it would resurrect a memory that was supposed to be superseded,
+    expired, forgotten, or deprecated. Fail-closed here, not fail-open —
+    the caller must upgrade this reader or reject the container, not guess.
+    """
+
 
 def apply_patch(store: CCLGStore, patch: MemoryPatch) -> list[MemoryNode]:
     """Apply a memory patch and return nodes written by the operation."""
@@ -214,10 +237,32 @@ def effective_view(
     (derivatives/schift-ai-memory/packages/core/src/cclg-effective-view.ts) —
     ``ContainerBundle.effective_view()`` in `container.py` is the canonical
     caller that wires a loaded container's patches through here.
+
+    Fail-closed on an unrecognized operation: when ``patches`` is given, every
+    patch's `operation` MUST be in ``KNOWN_PATCH_OPERATIONS`` (retiring or
+    explicitly known-non-retiring) or this raises
+    ``UnknownPatchOperationError``. This function is the single place that
+    decision is enforced (not `MemoryPatch.from_dict`, which stays a plain,
+    non-raising constructor so `schema.py`'s validators can keep aggregating
+    *every* problem in a container in one pass rather than failing fast on the
+    first bad record — see `container.load_container`). Silently treating an
+    unknown operation as non-retiring here would be exactly the failure mode
+    this whole gate exists to prevent: a future container-format version (or a
+    hand-edited/corrupted patch record) naming an operation this reader has
+    never heard of could be one that *should* retire its target, and
+    computing an effective view that quietly ignores it would resurrect a
+    memory that was supposed to have been superseded, expired, forgotten, or
+    deprecated.
     """
     excluded_ids: set[str] = set()
     if patches:
         for patch in patches:
+            if patch.operation not in KNOWN_PATCH_OPERATIONS:
+                raise UnknownPatchOperationError(
+                    f"patch {patch.id!r} has unrecognized operation {patch.operation!r}; "
+                    f"refusing to compute effective view (docs/CCLG_CONTAINER.md §3.1.1 "
+                    f"fail-closed load semantics) — known operations: {sorted(KNOWN_PATCH_OPERATIONS)}"
+                )
             if patch.operation in RETIRING_PATCH_OPERATIONS:
                 excluded_ids.update(patch.target_ids)
 

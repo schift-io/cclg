@@ -1,0 +1,5 @@
+{
+  "description": "A node record carrying a forbidden auth field ('org_id') nested in metadata. Must error at load regardless of validate=.",
+  "expect_error": "load_always",
+  "session_id": null
+}

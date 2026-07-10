@@ -1,0 +1,7 @@
+{
+  "description": "A conflict_pending node resolved via resolve_conflict into a new active node; only the resolved node survives.",
+  "effective_view_node_ids": [
+    "mem_conflict_resolved"
+  ],
+  "session_id": null
+}

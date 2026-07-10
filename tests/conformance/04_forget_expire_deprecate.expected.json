@@ -1,0 +1,7 @@
+{
+  "description": "One node each retired via forget/expire/deprecate; only the untouched survivor remains.",
+  "effective_view_node_ids": [
+    "mem_retire_survivor"
+  ],
+  "session_id": null
+}

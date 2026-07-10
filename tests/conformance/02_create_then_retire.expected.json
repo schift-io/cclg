@@ -1,0 +1,7 @@
+{
+  "description": "Node D created via a 'create' patch, then retired via 'forget'; only E (untouched) survives.",
+  "effective_view_node_ids": [
+    "mem_survivor_e"
+  ],
+  "session_id": null
+}
