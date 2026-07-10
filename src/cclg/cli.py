@@ -94,6 +94,14 @@ def build_parser() -> argparse.ArgumentParser:
     pull.add_argument("--agent", default="", help="Agent id (required when --scope agent)")
     pull.add_argument("--json", action="store_true")
 
+    push = sub.add_parser("push", help="Push local CORE/AGENT memory to a Schift agent-hub tenant as a pending import")
+    push.add_argument("--remote", required=True, help="agent-hub base URL, e.g. https://agent-hub.internal")
+    push.add_argument("--tenant", required=True, help="Tenant id to push under (also required to match scope.org on selected nodes)")
+    push.add_argument("--scope", required=True, choices=["core", "agent"], help="Memory scope to push into")
+    push.add_argument("--agent", default="", help="Agent id (required when --scope agent)")
+    push.add_argument("--node", action="append", default=[], dest="nodes", help="Limit to this node id. Repeatable. Omit to select every active node with scope.org == tenant.")
+    push.add_argument("--json", action="store_true")
+
     patch = sub.add_parser("patch", help="Apply a memory patch")
     patch.add_argument("operation", choices=["create", "update", "supersede", "refine", "expand", "narrow", "merge", "split", "expire", "deprecate", "forget", "resolve_conflict", "rollback"])
     patch.add_argument("--target", action="append", default=[], dest="targets")
@@ -374,6 +382,25 @@ def _main(argv: list[str] | None = None) -> int:
             print(f"skipped_patches: {payload['skipped_patches']}")
             print(f"imported_edges: {payload['imported_edges']}")
             print(f"skipped_edges: {payload['skipped_edges']}")
+        return 0
+
+    if args.command == "push":
+        from .push import PushError, push as run_push
+
+        try:
+            summary = run_push(store, remote=args.remote, tenant=args.tenant, scope=args.scope, agent=args.agent, node_ids=args.nodes or None)
+        except PushError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        payload = summary.to_dict()
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            print(f"pushed {args.tenant}/{args.scope}{'/' + args.agent if args.agent else ''} to {args.remote}")
+            print(f"node_count: {payload['node_count']}")
+            print(f"patch_count: {payload['patch_count']}")
+            print(f"imported_pending: {payload['imported_pending']}")
+            print(f"skipped: {payload['skipped']}")
         return 0
 
     if args.command == "patch":
