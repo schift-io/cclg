@@ -9,7 +9,7 @@ from pathlib import Path
 from cclg.bench import run_benchmarks
 from cclg.cli import audit_report, doctor_report, main as cli_main, validate_paths
 from cclg.codegraph import build_code_graph, search_code_graph
-from cclg.format import CODE_GRAPH_SCHEMA, HOOK_OUTPUT_SCHEMA, render_active_pack_toml
+from cclg.format import CODE_GRAPH_SCHEMA, render_active_pack_toml
 from cclg.hooks import user_prompt_context
 from cclg.mcp_server import handle_message, iter_messages
 from cclg.models import MemoryNode
@@ -40,8 +40,9 @@ class CCLGSurfaceTests(unittest.TestCase):
                 include_codegraph=False,
             )
 
-            self.assertEqual(output["schema_version"], HOOK_OUTPUT_SCHEMA)
-            self.assertTrue(output["continue"])
+            # Hosts (Claude Code / Codex plugin_hooks) reject unknown top-level
+            # keys in hook stdout — the payload must stay schema-only.
+            self.assertEqual(set(output.keys()), {"hookSpecificOutput"})
             self.assertIn("additionalContext", output["hookSpecificOutput"])
             self.assertIn("Hooks inject CCLG memory", output["hookSpecificOutput"]["additionalContext"])
 

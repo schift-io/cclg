@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .codegraph import build_code_graph, render_code_pack, save_code_graph
-from .format import HOOK_OUTPUT_SCHEMA, render_active_pack_toml, source_label
+from .format import render_active_pack_toml, source_label
 from .pack import compile_pack
 from .session import append_session_event, normalize_session_id
 from .store import CCLGStore
@@ -70,17 +70,29 @@ def _emit(output: dict[str, Any]) -> None:
 
 
 def _fallback_output(event: str, exc: Exception) -> dict[str, Any]:
-    output: dict[str, Any] = {
-        "schema_version": HOOK_OUTPUT_SCHEMA,
-        "continue": True,
-        "cclg": {"event": event, "error": f"{type(exc).__name__}: {exc}"},
-    }
+    _audit_error(event, exc)
     if event in {"user-prompt", "session-start"}:
-        output["hookSpecificOutput"] = {
-            "hookEventName": "SessionStart" if event == "session-start" else "UserPromptSubmit",
-            "additionalContext": "",
+        return {
+            "hookSpecificOutput": {
+                "hookEventName": "SessionStart" if event == "session-start" else "UserPromptSubmit",
+                "additionalContext": "",
+            },
         }
-    return output
+    return {}
+
+
+def _audit_error(event: str, exc: Exception) -> None:
+    """Record hook errors in the store's audit log instead of stdout.
+
+    stdout is reserved for the host's hook-output schema: Claude Code and
+    Codex plugin_hooks strictly validate the JSON and reject unknown
+    top-level keys ("hook returned invalid ... JSON output"), so error
+    details must never ride along in the emitted payload.
+    """
+    try:
+        CCLGStore(None).append_audit({"kind": "hook_error", "event": event, "error": f"{type(exc).__name__}: {exc}"})
+    except Exception:  # noqa: BLE001 - auditing must never break the host
+        pass
 
 
 def read_stdin_json() -> dict[str, Any]:
@@ -118,33 +130,22 @@ def user_prompt_context(
         graph_path = store.active_dir / "codegraphs" / f"{code_root.name or 'repo'}.json"
         save_code_graph(graph, graph_path)
         context += "\n" + render_code_pack(graph, prompt, limit=12)
+    # Only schema-listed keys may appear on stdout (strict host validation);
+    # CCLG telemetry lives in the session/audit store, not the hook payload.
     return {
-        "schema_version": HOOK_OUTPUT_SCHEMA,
-        "continue": True,
         "hookSpecificOutput": {
             "hookEventName": hook_event_name,
             "additionalContext": context,
-        },
-        "cclg": {
-            "session_id": normalized_session_id,
-            "active_nodes": len(pack.memory_nodes),
-            "suppressed_nodes": len(pack.suppressed_nodes),
         },
     }
 
 
 def ingest_event(store: CCLGStore, event: str, payload: dict[str, Any]) -> dict[str, Any]:
     session_id = extract_session_id(payload)
-    session = append_session_event(store, session_id=session_id, event=event, payload=payload)
-    return {
-        "schema_version": HOOK_OUTPUT_SCHEMA,
-        "continue": True,
-        "cclg": {
-            "session_id": session["id"],
-            "event": event,
-            "events_recorded": len(session.get("events", [])),
-        },
-    }
+    append_session_event(store, session_id=session_id, event=event, payload=payload)
+    # Empty object = "no action" for every hook event; anything beyond the
+    # host's schema (counters, session ids) gets rejected as invalid output.
+    return {}
 
 
 def markdown_pack(pack: dict[str, Any]) -> str:
