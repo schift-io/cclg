@@ -642,6 +642,17 @@ cclg pack-file backup.cclg
 cclg open backup.cclg
 ```
 
+`cclg pull` imports a tenant's CORE/AGENT memory scope from a Schift
+agent-hub `.cclg` export (`GET /v1/memory/export.cclg`) into the local store —
+same-id/same-content is skipped, a same-id content conflict marks the local
+node `conflict_pending` and links the remote version via
+`relations.contradicts` instead of overwriting. The auth secret is read from
+`CCLG_PULL_SECRET` (env-only, never a flag):
+
+```bash
+CCLG_PULL_SECRET=... cclg pull --remote https://agent-hub.internal --tenant acme --scope core
+```
+
 Container invariants:
 
 ```text

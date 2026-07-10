@@ -87,6 +87,13 @@ def build_parser() -> argparse.ArgumentParser:
     open_cmd.add_argument("path", help="Path to a .cclg container file")
     open_cmd.add_argument("--json", action="store_true")
 
+    pull = sub.add_parser("pull", help="Pull a tenant's CORE/AGENT memory scope from a Schift agent-hub .cclg export into the local store")
+    pull.add_argument("--remote", required=True, help="agent-hub base URL, e.g. https://agent-hub.internal")
+    pull.add_argument("--tenant", required=True, help="Tenant id to pull (stamped onto scope.org for every imported node)")
+    pull.add_argument("--scope", required=True, choices=["core", "agent"], help="Memory scope to export/pull")
+    pull.add_argument("--agent", default="", help="Agent id (required when --scope agent)")
+    pull.add_argument("--json", action="store_true")
+
     patch = sub.add_parser("patch", help="Apply a memory patch")
     patch.add_argument("operation", choices=["create", "update", "supersede", "refine", "expand", "narrow", "merge", "split", "expire", "deprecate", "forget", "resolve_conflict", "rollback"])
     patch.add_argument("--target", action="append", default=[], dest="targets")
@@ -345,6 +352,28 @@ def _main(argv: list[str] | None = None) -> int:
                     print(f"- @{name}: {count}")
             for warning in bundle.warnings:
                 print(f"warning: {warning}")
+        return 0
+
+    if args.command == "pull":
+        from .pull import PullError, pull as run_pull
+
+        try:
+            summary = run_pull(store, remote=args.remote, tenant=args.tenant, scope=args.scope, agent=args.agent)
+        except PullError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        payload = summary.to_dict()
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            print(f"pulled {args.tenant}/{args.scope}{'/' + args.agent if args.agent else ''} from {args.remote}")
+            print(f"imported_nodes: {payload['imported_nodes']}")
+            print(f"skipped_nodes: {payload['skipped_nodes']}")
+            print(f"conflict_nodes: {payload['conflict_nodes']}")
+            print(f"imported_patches: {payload['imported_patches']}")
+            print(f"skipped_patches: {payload['skipped_patches']}")
+            print(f"imported_edges: {payload['imported_edges']}")
+            print(f"skipped_edges: {payload['skipped_edges']}")
         return 0
 
     if args.command == "patch":
