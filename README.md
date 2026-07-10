@@ -691,6 +691,7 @@ scripts/publish-github.sh --execute
 
 ## Docs
 
+- [The `.cclg` standard (spec + conformance + MCP binding + implementations)](docs/STANDARD.md)
 - [Format](docs/FORMAT.md)
 - [Container format `.cclg`](docs/CCLG_CONTAINER.md)
 - [Canonical format TOML](format/cclg.format.v0.1.toml)
