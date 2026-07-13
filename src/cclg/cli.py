@@ -962,6 +962,7 @@ def write_codex_skills() -> list[Path]:
     return [
         write_skill(
             "cclg-memory",
+            "Recall local long-term CCLG memory when the task may depend on it; treat memory as hints and verify drift-prone facts.",
             """# CCLG Memory
 
 Use this skill when the task may depend on local long-term CCLG memory.
@@ -978,6 +979,7 @@ user explicitly enables sync or API mode.
         ),
         write_skill(
             "cclg-codegraph",
+            "Repo-aware context selection with cclg code-search/code-index for codebase tasks.",
             """# CCLG Code Graph
 
 Use this skill for codebase tasks that need repo-aware context selection.
@@ -993,6 +995,7 @@ definitions, imports, define/import edges, and git churn.
         ),
         write_skill(
             "cclg-hooks",
+            "Wire or validate CCLG hook and MCP tool surfaces (cclg-hook, cclg-mcp) with config examples.",
             """# CCLG Hooks and Tools
 
 Use this skill when wiring or validating CCLG as a tool/hook surface.
@@ -1013,6 +1016,7 @@ Config examples:
         ),
         write_skill(
             "cclg-bench",
+            "Run cclg bench suites before claiming CCLG memory/tool/codegraph behavior works.",
             """# CCLG Bench
 
 Use this skill before claiming CCLG memory/tool/codegraph behavior is working.
@@ -1034,11 +1038,12 @@ Suites:
     ]
 
 
-def write_skill(name: str, body: str) -> Path:
+def write_skill(name: str, description: str, body: str) -> Path:
     skill_dir = Path.home() / ".codex" / "skills" / name
     skill_dir.mkdir(parents=True, exist_ok=True)
     path = skill_dir / "SKILL.md"
-    path.write_text(body, encoding="utf-8")
+    frontmatter = f"---\nname: {name}\ndescription: {description}\n---\n\n"
+    path.write_text(frontmatter + body, encoding="utf-8")
     return path
 
 

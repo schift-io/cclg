@@ -34,7 +34,7 @@
   "mcpServers": {
     "cclg": {
       "command": "{{CCLG_BIN_DIR}}/cclg-mcp",
-      "args": []
+      "args": ["--line-delimited"]
     }
   }
 }
