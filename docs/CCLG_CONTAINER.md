@@ -377,8 +377,8 @@ records through to `patches.effective_view()`'s `patches=` argument so a
 retiring patch excludes its target even when the node's `status` was never
 baked to the retired value. `patches.effective_view(nodes)` — called with no
 `patches=` — keeps its original store-only semantics (status filter only) and
-is unaffected; every pre-existing caller (`active_nodes()` in this module,
-agent-hub's `cclg_grounding.py`/`pack.py`) keeps this original behavior
+is unaffected; every pre-existing caller (`active_nodes()` in this module
+and the hosted runtime's grounding/pack call sites) keeps this original behavior
 unchanged because `patches` defaults to `None`.
 
 ```text

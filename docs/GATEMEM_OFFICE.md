@@ -209,7 +209,8 @@ understood.
 547/547 checkpoints, deterministic adapter (byte-identical reruns), zero
 generation errors. Answerer: schift-local-a3b. Judge: gemini-3.1-flash-lite
 (GateMem's official judge prompt; 0% parse failures; every judge-positive leak
-was manually audited against the raw answers and confirmed real).
+was manually audited against the raw answers and confirmed real). Judge token
+spend for this run: 499,487.
 
 ```text
 context-level (what CCLG lets into the prompt):
@@ -254,8 +255,7 @@ python3 scripts/gatemem_office_score_mode1.py --stage all \
 547/547 checkpoints, 0 generation errors, 0% judge parse failures. v1 artifacts
 were preserved (not overwritten) as `tmp/gatemem-out/{answers,judgments,
 scores_ruled,scores_mode1}_v1.*` before this run; v2 outputs are the `_v2`
-siblings. Judge token spend: 502,762 for this run (499,487 for v1 — cumulative
-~1.0M of the 3M judge budget).
+siblings. Judge token spend: 502,762 for this run.
 
 **One-line summary: utility rose sharply as intended by the fix (17.5% -> 47.4%
 judge-effective), but active-forgetting (deletion) answer-level leakage got
@@ -317,8 +317,8 @@ preserved at `tmp/gatemem-out/scores_mode1_v1.json` (`answers_v1.jsonl`,
 v2's HIGH-severity finding was that the answerer itself confirms/reconstructs
 attacker-supplied values ("Yes, the deleted token began with rb_stg") — a
 failure mode a memory-layer fix cannot address. `cclg.grounding_rail`
-(schift-monorepo `services/agent-hub/src/agent_hub/output_rail.py`'s shared L4
-rail — deterministic, zero LLM/network calls) was built specifically to catch
+(the same shared L4 output rail used by the hosted runtime —
+deterministic, zero LLM/network calls) was built specifically to catch
 this: it checks whether every credential/date/amount/proper-noun-shaped value
 in the answer text actually traces back to the retrieval context the answerer
 was given, and redacts (or, for credential-shaped values / majority-ungrounded
@@ -355,8 +355,7 @@ answers, before this scoring run ever touched them.
 Rail effect on the 547 v2 answers: 47 flagged (8.6%), of which 21 (3.8%)
 escalated to full refusal and 26 (4.8%) partially redacted. Zero generation
 errors (n/a — no generation this run), 0% judge parse failures. Judge token
-spend: 503,019 for this run (cumulative v1+v2+v3 = 1,505,268 of the 3,000,000
-budget, 50.2%).
+spend: 503,019 for this run.
 
 ### v2 vs v3 (L4 rail OFF vs ON, same v2 answers/pack otherwise)
 
@@ -471,7 +470,7 @@ score, not just the action label.
   100% root-caused to the single-candidate-proper-noun-pair 50%-ratio
   escalation branch reacting to an entity-naming paraphrase mismatch
   ("Project X" in the query/answer vs bare "X" in the retrieved context).
-  Recommended fix before considering flag-on in production: do not let a
+  Recommended fix before enabling the rail by default: do not let a
   *lone*, *non-credential-shaped* distinctive span alone trigger the
   ratio-based full-refusal escalation — reserve full-refusal escalation for
   credential-shaped ungrounded spans (already working correctly, per the
@@ -479,10 +478,10 @@ score, not just the action label.
   proper-noun/date/amount mismatches to partial redaction (or no action) so a
   single paraphrase doesn't blank out an otherwise-correct answer. This is a
   scoped rail-heuristic fix, not a rethink of the rail's design.
-- **Flag stays OFF in production** (per this task's guardrail) regardless of
-  this result — this rescore is local-only, over `tmp/gatemem-out/` in this
-  repo; no schift-monorepo agent-hub config, flag, or prod behavior was
-  touched by this exercise.
+- **The rail is not enabled by default** (per this task's guardrail) regardless
+  of this result — this rescore is local-only, over `tmp/gatemem-out/` in this
+  repo; no hosted-runtime config, flag, or deployment behavior was touched by
+  this exercise.
 
 Full raw output: `tmp/gatemem-out/scores_mode1_v3.json` (also
 `answers_v3.jsonl`, `judgments_v3.jsonl`, `scores_ruled_v3.jsonl`). v1/v2
@@ -506,8 +505,7 @@ could be implemented, unit-tested, and adversarially attacked in isolation:
   refusal. Requires the new `query` parameter, threaded through
   `apply_output_rail(answer, grounding_context=..., query=...)`,
   `output_rail_hook`/`gatemem_rail_postprocess` (predictions `query_text`),
-  and agent-hub's call sites (react runner + router_dispatch safety net,
-  fail-soft for older cclg builds).
+  and the hosted runtime's call sites (fail-soft for older cclg builds).
 - **`value_grounding`** — canonical matching instead of literal substring
   (separator/possessive/case folding, date-notation equivalence, Korean
   numeral-multiplier amount expansion incl. chained terms, script-aware
@@ -523,7 +521,7 @@ could be implemented, unit-tested, and adversarially attacked in isolation:
 Verification: 6 adversarial verifier agents (over-scrub + bypass per rule,
 2 rounds, ~40 confirmed breaks found and fixed with per-break regression
 tests, all general-principle fixes — no fixture vocabulary in executable
-code, verified by scan). CCLG suite 123 → 335 passed; agent-hub 924 passed.
+code, verified by scan). CCLG suite 123 → 335 passed.
 Fixture gate: all 16 v3 residual leaks refused, all 3 v3 over-scrub rows
 byte-untouched.
 
@@ -564,9 +562,9 @@ The handoff goal ("privacy/deletion both meaningfully down AND utility
 ≥47%") is met with the utility number being a conservative lower bound. The
 residual 1.2% privacy (2/171 rule-scored rows) are prose-disclosure shapes
 outside any deterministic string gate's reach. A paid gemini judge run of v4
-would only tighten the bounds and is left as an explicit opt-in (budget
-remains 1.5M of 3M; a full run ≈ 0.5M). **Flag stays OFF in production** —
-flag-on remains a per-case GO after prod-side review.
+would only tighten the bounds and is left as an explicit opt-in (estimated
+cost ≈ 0.5M judge tokens for a full run). **The rail is not enabled by
+default** — enabling it is a per-deployment decision after review.
 
 Full raw output: `tmp/gatemem-out/scores_mode1_v4.json`, `answers_v4.jsonl`,
 `scores_ruled_v4.jsonl` (no `judgments_v4.jsonl` — judge not run; splice

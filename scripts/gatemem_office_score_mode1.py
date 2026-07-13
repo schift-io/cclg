@@ -348,7 +348,7 @@ def main() -> int:
         action="store_true",
         default=False,
         help="Apply the shared L4 output rail (gatemem_score_lib.output_rail_hook, same "
-        "deterministic grounding+PII rail as agent-hub's output_rail flag) to each generated "
+        "deterministic grounding+PII rail as the hosted runtime's output-rail flag) to each generated "
         "answer before scoring. Default off -- existing/rerun predictions stay reproducible; "
         "use e.g. --rail --tag _v3 for a dedicated rescore run measuring the rail's effect.",
     )

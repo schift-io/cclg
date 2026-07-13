@@ -46,8 +46,7 @@ from .container import ContainerBundle, load_container, pack_for_export
 from .pull import PULL_SECRET_ENV
 from .store import CCLGStore
 
-# Same header agent-hub's shared-secret gate expects
-# (schift/services/agent-hub/src/agent_hub/api_deps.py:require_shared_secret) —
+# Same header the agent-hub shared-secret gate expects —
 # duplicated as a plain string (not imported from `.pull`) because it is a
 # wire-protocol constant this module also owns, not a `pull`-private detail.
 _SECRET_HEADER = "X-Room821-Agent-Hub-Secret"

@@ -1,9 +1,8 @@
 """L4 output rail hook for the GateMem Office Mode 1 rescoring harness.
 
 Wraps ``cclg.grounding_rail.apply_output_rail`` -- the same deterministic
-grounding+PII rail applied in the schift-monorepo's production ReAct
-pipeline (``services/agent-hub/src/agent_hub/output_rail.py``, gated by the
-``output_rail`` feature flag there) -- so this harness can measure the
+grounding+PII rail shared with the hosted runtime's ReAct pipeline (gated
+by a feature flag there) -- so this harness can measure the
 rail's effect on the documented GateMem Office Mode 1 failure mode:
 governance/context-leak was already 0% (docs/GATEMEM_OFFICE.md), yet
 answer-level privacy/deletion violations were still 3.5%/5.0% because the

@@ -55,13 +55,13 @@ See `docs/CCLG_CONTAINER_PLAN.md` for rationale and spec.
 - [x] R1-R3 deterministic precision: weak/strong trigger split, conditional and
       reported-speech suppression, enumeration guard, money canonicalization,
       lexeme-boundary matching. Eval fixture 22 pos / 45 neg at P=1.0 R=1.0;
-      recall 12/12 on novel corrections; 19/19 agent-hub packs live.
+      recall 12/12 on novel corrections.
 - [ ] Ceiling reached for keyword-only rules (adversarial R3: 아니라서/아니라도
       connectives, -대/-래/카더라 hearsay, ~할지 고민 중 deliberation,
       multi-sentence contamination, 2-item hedges). Next: demote the detector
       to a candidate generator and add an LLM-confirm gate before writing a
-      supersession marker (schift-local-a3b, zero external cost, fires only on
-      candidates). Flag `cclg_corrections` stays OFF until then.
+      supersession marker — a small local/self-hosted model suffices, fired
+      only on candidates.
 
 ## GateMem follow-ups (2026-07-05)
 

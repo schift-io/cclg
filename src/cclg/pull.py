@@ -53,8 +53,7 @@ from .models import MemoryEdge, MemoryNode, MemoryPatch, now_iso
 from .store import CCLGStore
 
 # Env-only, by design (see module docstring): never a CLI flag, never written
-# to config.json. Matches the header agent-hub's shared-secret gate expects
-# (schift/services/agent-hub/src/agent_hub/api_deps.py:require_shared_secret).
+# to config.json. Matches the header the agent-hub shared-secret gate expects.
 PULL_SECRET_ENV = "CCLG_PULL_SECRET"
 _SECRET_HEADER = "X-Room821-Agent-Hub-Secret"
 

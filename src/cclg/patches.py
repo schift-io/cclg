@@ -359,9 +359,9 @@ EXPANSION_TRIGGERS = ["도 되어야", "다 지원", "지원해야", "도 지원
 NEGATION_TRIGGERS = ["하지 마", "하지마", "쓰지 마", "쓰지마", "말고", "금지", "제외", "do not", "don't", "must not", "exclude"]
 
 # Operations classify_patch()/detect_patch_candidates() can return that retire
-# a target rather than merely annotate it -- mirrors the family agent-hub's
-# ``cclg_grounding._RETIRING_OPS`` filters candidates by (that module lives in
-# schift/services/agent-hub and is not owned here; kept in sync by hand).
+# a target rather than merely annotate it -- mirrors the retiring-ops filter
+# the hosted runtime's grounding consumer applies to candidates (that module
+# is not owned here; kept in sync by hand).
 # classify_patch() never returns "forget", but the name is included for
 # parity with the consumer-side set.
 RETIRING_CANDIDATE_OPERATIONS = {"supersede", "update", "narrow", "deprecate", "forget"}

@@ -5,7 +5,7 @@ as of commit 91271dd): a span in this class is kept only if it can be proven
 to appear in ``grounding_context`` (case-insensitive substring match on the
 whitespace-collapsed lowercase form); with no grounding_context at all,
 every pii-shaped span is treated as ungrounded (default-deny — this is the
-posture the agent-hub ``router_dispatch`` context-free safety net relies
+posture the hosted runtime's context-free safety net relies
 on). An ungrounded *credential-shaped* span escalates to a full refusal
 (``RuleFinding.refuse``): partially masking a confirmed credential fragment
 ("the token began with [REDACTED]") still leaks that a value existed and was

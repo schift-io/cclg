@@ -1,16 +1,16 @@
 """OpenAI-compatible chat clients for the two approved models only:
 
-- schift-local-a3b  (answer generation, our own infra) -- mirrors
-  schift/services/agent-hub/src/agent_hub/real_inference.py
-  (generate_section_via_openai_compatible) and inference_router.py
-  (private_rtx_route): base_url=$SCHIFT_LLM_BASE_URL (default
-  https://llm.schift.io), model=$SCHIFT_LLM_MODEL (default
-  unsloth/Qwen3.6-27B-NVFP4), Bearer $SCHIFT_LLM_API_KEY,
-  chat_template_kwargs.enable_thinking=False (Qwen3 thinking-mode off).
-- gemini-3.1-flash-lite (judge only) -- mirrors inference_router.py's
-  gemini_flash_lite_route(): base_url=$GEMINI_API_BASE_URL (default
-  Google's OpenAI-compatible endpoint), model=$GEMINI_3_1_FLASH_LITE_MODEL,
-  Bearer $GEMINI_API_KEY. Same /chat/completions contract as a3b.
+- schift-local-a3b (answer generation): a generic OpenAI-compatible
+  /chat/completions client configured entirely via env vars --
+  base_url=$SCHIFT_LLM_BASE_URL, model=$SCHIFT_LLM_MODEL, Bearer
+  $SCHIFT_LLM_API_KEY, chat_template_kwargs.enable_thinking=False
+  (Qwen3-style thinking-mode off, ignored by providers that don't
+  support it). SCHIFT_LLM_BASE_URL and SCHIFT_LLM_MODEL must both be
+  set; there is no built-in default endpoint or model.
+- gemini-3.1-flash-lite (judge only): base_url=$GEMINI_API_BASE_URL
+  (default Google's OpenAI-compatible endpoint),
+  model=$GEMINI_3_1_FLASH_LITE_MODEL, Bearer $GEMINI_API_KEY. Same
+  /chat/completions contract as a3b.
 
 No other paid model may be substituted here (absolute guardrail).
 """
@@ -141,20 +141,25 @@ class OpenAICompatibleClient:
 
 
 def schift_a3b_client(*, max_tokens: int = 512, temperature: float = 0.0) -> OpenAICompatibleClient:
-    """schift-local-a3b generation client. Raises LLMCallError with the
-    documented retrieval command if SCHIFT_LLM_API_KEY is unset."""
-    base_url = os.getenv("SCHIFT_LLM_BASE_URL", "https://llm.schift.io")
-    model = os.getenv("SCHIFT_LLM_MODEL", "unsloth/Qwen3.6-27B-NVFP4")
+    """schift-local-a3b generation client. Raises LLMCallError if any of
+    SCHIFT_LLM_BASE_URL, SCHIFT_LLM_MODEL, or SCHIFT_LLM_API_KEY is unset."""
+    base_url = os.getenv("SCHIFT_LLM_BASE_URL")
+    model = os.getenv("SCHIFT_LLM_MODEL")
     api_key = os.getenv("SCHIFT_LLM_API_KEY")
-    if not api_key:
+    missing = [
+        name
+        for name, value in (
+            ("SCHIFT_LLM_BASE_URL", base_url),
+            ("SCHIFT_LLM_MODEL", model),
+            ("SCHIFT_LLM_API_KEY", api_key),
+        )
+        if not value
+    ]
+    if missing:
         raise LLMCallError(
-            "SCHIFT_LLM_API_KEY is not set. Documented retrieval "
-            "(schift/research/bench/mem0-vs-schift/README.md):\n"
-            "  export SCHIFT_LLM_API_KEY=$(gcloud secrets versions access latest "
-            "--secret=schift-llm-router-api-key --project=schift)\n"
-            "This subagent's sandbox denied that gcloud call (permission classifier). "
-            "A session with gcloud secret-read permission for the `schift` project must "
-            "export SCHIFT_LLM_API_KEY before running the `generate`/`all` stages."
+            f"{', '.join(missing)} not set. Export SCHIFT_LLM_API_KEY (and "
+            "SCHIFT_LLM_BASE_URL, SCHIFT_LLM_MODEL) before running the "
+            "generate/all stages."
         )
     return OpenAICompatibleClient(
         base_url=base_url,
